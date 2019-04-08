@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body onload='init();'>
+<h1>Earth and Moon</h1>
+<h3>NOTE: Moon's distance from earth has been scaled to be more visible (actual moon path plotted in red)</h3>
+
+
+<canvas id="c1" width="512" height="512" style='border:2px solid #000000'></canvas>
+<img id='sun' src='sun.jpg' style='display:none;'></br>
+<img id='earth' src='earth.jpg' style='display:none;'></br>
+<img id='moon' src='moon.png' style='display:none;'></br>
+<input type='button' onclick='init();' value='initialize'>
+<input type='button' onclick='running=!running;' value='run'></br></br>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<!-- the table of values                                                -->
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<table>
+    <tr>
+        <td>mMoon</td>
+        <td><input type='number' id='mMoon' value= 7.3477e22></td>
+    </tr>
+    <tr>
+        <td>mEarth</td>
+        <td><input type='number' id='mEarth' value=5.9722e24></td>
+    </tr>
+    <tr>
+        <td>mSun</td>
+        <td><input type='number' id='mSun' value=1.9891e30></td>
+    </tr>
+    <tr>
+        <td>moonR0</td>
+        <td><input type='number' id='moonR0' value=3.844e8></td>
+    </tr>
+    <tr>
+        <td>moonRX0</td>
+        <td><input type='number' id='moonRX0' value=3.844e8></td>
+    </tr>
+    <tr>
+        <td>moonRY0</td>
+        <td><input type='number' id='moonRY0' value=0></td>
+    </tr>
+    <tr>
+        <td>moonVX0</td>
+        <td><input type='number' id='moonVX0' value=0></td>
+    </tr>
+    <tr>
+        <td>moonVY0</td>
+        <td><input type='number' id='moonVY0' value=1000.0></td>
+    </tr>
+    <tr>
+        <td>earthR0</td>
+        <td><input type='number' id='earthR0' value=1.4710e11></td>
+    </tr>
+    <tr>
+        <td>earthRX0</td>
+        <td><input type='number' id='earthRX0' value=1.4710e11></td>
+    </tr>
+    <tr>
+        <td>earthRY0</td>
+        <td><input type='number' id='earthRY0' value=0></td>
+    </tr>
+    <tr>
+        <td>earthVX0</td>
+        <td><input type='number' id='earthVX0' value=0></td>
+    </tr>
+    <tr>
+        <td>earthVY0</td>
+        <td><input type='number' id='earthVY0' value=3.0287e4></td>
+    </tr>
+    <tr>
+        <td>dt</td>
+        <td><input type='number' id='dt' value=1.0 ></td>
+    </tr>
+    <tr>
+        <td>frame length</td>
+        <td><input type='number' id='wait' value=20 ></td>
+    </tr>
+    <tr>
+        <td>skip</td>
+        <td><input type='number' id='skip' value=1 ></td>
+    </tr>
+
+</table>
+
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<!-- Computational script                                               -->
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<script>
+var position={x:0,y:0} ;
+var cnvs = document.getElementById('c1') ;
+var fctx = cnvs.getContext('2d') ;   /* final drawing canvas */
+var width   = cnvs.width ;
+var height  = cnvs.height ;
+
+var bcnvs = document.createElement('canvas') ;  /* background canvas */
+bcnvs.width = width ;
+bcnvs.height  = height ;
+var bctx = bcnvs.getContext('2d') ;
+
+/* getting a handle on the images */
+var moon = document.getElementById('moon') ;  
+moon.scale = 0.01 ;
+
+var earth   = document.getElementById('earth') ;
+earth.scale = .07 ;
+
+var sun   = document.getElementById('sun') ;
+sun.scale = .2 ;
+
+/*-------------------------------------------------------------------------
+ * Convert x, and y into canvas pixel coordinate system 
+ *-------------------------------------------------------------------------
+ */
+var minX = -1.5 ;
+var maxX = 1.5 ;
+var minY = -1.5;
+var maxY = 1.5 ;
+
+function Px(x){
+    const newX = x / (earthR0 + moonR0);
+    return width*(newX-minX)/(maxX-minX) ;
+}
+function Py(y){
+    const newY = y / (earthR0 + moonR0);
+    return height*(maxY-newY)/(maxY-minY) ;
+}
+
+/*-------------------------------------------------------------------------
+ * defining global variables for the physical problem
+ *-------------------------------------------------------------------------
+ */
+function MovableObject(_mass, xPos, yPos, xVel, yVel) {
+    return {
+        mass: _mass,
+        x: xPos,
+        y: yPos,
+        vx: xVel,
+        vy: yVel,
+        lastAccelX: 0.0,
+        lastAccelY: 0.0
+    }
+}
+
+var mMoon, mEarth, mSun, dt, moonR0, moonRX0,moonRY0, moonVX0, moonVY0, earthR0, earthRX0, earthRY0, earthVX0, earthVY0;
+var movableObjects = []
+var moonObj, earthObj, sunObj;
+var G= 6.6738e-11;    //m^3/(Kg*s)
+var running=false ;
+
+
+function getNum(id){ /* gets the number from the GUI using the id */
+    return eval(document.getElementById(id).value) ;
+}
+
+/*-------------------------------------------------------------------------
+ * initalizes the solution
+ *-------------------------------------------------------------------------
+ */
+function init(){
+/*-------------------------------------------------------------------------
+ * read numbers from graphical interface
+ *-------------------------------------------------------------------------
+ */
+    mMoon = getNum('mMoon');  // kg
+    mEarth=getNum('mEarth');  // kg
+    mSun=getNum('mSun');  // kg
+    dt=(24.0*60.0*60.0)*getNum('dt'); // 0.2 day increment
+
+    moonR0=getNum('moonR0');
+    moonRX0=getNum('moonRX0');
+    moonRY0=getNum('moonRY0');
+
+    moonVY0=getNum('moonVY0');
+    moonVX0=getNum('moonVX0');
+
+    earthR0=getNum('earthR0');
+    earthRX0=getNum('earthRX0');
+    earthRY0=getNum('earthRY0');
+
+    earthVY0=getNum('earthVY0');
+    earthVX0=getNum('earthVX0');
+
+    movableObjects = []
+    moonObj = MovableObject(mMoon, moonRX0 + earthRX0, moonRY0 + earthRY0, moonVX0 + earthVX0, moonVY0 + earthVY0);
+    earthObj = MovableObject(mEarth, earthRX0, earthRY0, earthVX0, earthVY0);
+    sunObj = MovableObject(mSun, 0, 0, 0, 0);
+    movableObjects.push(moonObj);
+    movableObjects.push(earthObj);
+    movableObjects.push(sunObj);
+
+/*-------------------------------------------------------------------------
+ * clear background canvas, and draw the earth on it
+ *-------------------------------------------------------------------------
+ */
+    bctx.setTransform(1.,0,0,1,0,0) ;
+    bctx.clearRect(0,0,width,height) ;
+
+    //begin moon path
+    bctx.beginPath() ;
+    bctx.strokeStyle = "#ff0000" ; //moon path color
+    bctx.fillStyle = "#0000ff"; //earth path color
+    bctx.moveTo(Px(moonObj.x),Py(moonObj.y)) ;
+
+    fctx.setTransform(1.,0,0,1,0,0) ;
+    fctx.clearRect(0,0,width,height) ;
+
+    drawStuff() ;
+}
+
+/*-------------------------------------------------------------------------
+ * March the solution for one time-step
+ *-------------------------------------------------------------------------
+ */
+ function marchTime() {
+    /*Verlet integration*/
+    movableObjects.forEach(updateAcceleration);
+    // update position after acceleration so that order of processing doesn't matter
+    movableObjects.forEach(updatePosition);
+    // use updated positions to update the velocities
+    movableObjects.forEach(updateVelocity);
+}
+
+function updateAcceleration(moveObj) {
+    let totalXForce = 0.0
+    let totalYForce = 0.0
+    for (let i = 0; i < movableObjects.length; i++) {
+        if (movableObjects[i] !== moveObj) {
+            const radius = distance(moveObj, movableObjects[i]);
+            const force = -G*moveObj.mass*movableObjects[i].mass/(radius**2);
+            totalXForce += force * (moveObj.x - movableObjects[i].x)/radius;
+            totalYForce += force * (moveObj.y - movableObjects[i].y)/radius;
+        }
+    }
+    moveObj.lastAccelX = totalXForce/moveObj.mass;
+    moveObj.lastAccelY = totalYForce/moveObj.mass;
+}
+
+function distance(moveObj1, moveObj2) {
+    const xDifference = moveObj1.x - moveObj2.x;
+    const yDifference = moveObj1.y - moveObj2.y;
+    return Math.sqrt(xDifference*xDifference + yDifference*yDifference)
+}
+
+function updatePosition(moveObj) {
+    // Updates position using Verlet integration
+    moveObj.x += dt*(moveObj.vx + dt*moveObj.lastAccelX/2.0);
+    moveObj.y += dt*(moveObj.vy + dt*moveObj.lastAccelY/2.0);
+}
+
+function updateVelocity(moveObj) {
+    // Updates velocity using Verlet integration
+    const oldAccelX = moveObj.lastAccelX;
+    const oldAccelY = moveObj.lastAccelY;
+    updateAcceleration(moveObj);
+
+    moveObj.vx += dt*(moveObj.lastAccelX + oldAccelX)/2.0;
+    moveObj.vy += dt*(moveObj.lastAccelY + oldAccelY)/2.0;
+}
+
+/*-------------------------------------------------------------------------
+ * draw the solution on the screen
+ *-------------------------------------------------------------------------
+ */
+function draw(){
+    /*Moon Background Path*/
+    bctx.lineTo(Px(moonObj.x),Py(moonObj.y)) ;
+    bctx.stroke() ;
+    bctx.moveTo(Px(moonObj.x),Py(moonObj.y)) ;
+
+    /*Moon*/
+    fctx.setTransform(1,0.,0.,1.,0.,0) ;
+    fctx.clearRect(0,0,width,height) ;
+    fctx.drawImage(bcnvs, 0,0) ;
+
+    const moonEarthXDiff = moonObj.x - earthObj.x;
+    const moonEarthYDiff = moonObj.y - earthObj.y;
+    const distFromEarthScale = 50;
+
+    fctx.translate(Px(moonObj.x + moonEarthXDiff*distFromEarthScale),
+                   Py(moonObj.y + moonEarthYDiff*distFromEarthScale)) ;
+    fctx.scale(moon.scale,moon.scale) ;
+    fctx.drawImage(moon,-moon.width/2.,-moon.height/2.) ;  
+
+    /*Earth Background Path*/
+    bctx.fillRect(Px(earthObj.x),Py(earthObj.y), 2, 2);
+
+    /*Earth*/
+    fctx.setTransform(1.,0,0,1,0,0) ;
+    fctx.translate(Px(earthObj.x), Py(earthObj.y)) ;
+    fctx.scale(earth.scale, earth.scale) ;
+    fctx.drawImage(earth,-earth.width/2., -earth.height/2.) ;
+
+    /*Sun*/
+    fctx.setTransform(1.,0,0,1,0,0) ;
+    fctx.translate(Px(sunObj.x), Py(sunObj.y)) ;
+    fctx.scale(sun.scale, sun.scale) ;
+    fctx.drawImage(sun,-sun.width/2., -sun.height/2.) ;
+}
+
+/*-------------------------------------------------------------------------
+ * run the solution
+ *-------------------------------------------------------------------------
+ */
+function run(){
+    if (running){
+        for (let i = 0; i < getNum('skip'); i++) {
+            marchTime() ;
+        }
+        //draw() ; //overhead from drawing can slow us down, so we should separate this
+    }
+    setTimeout(run,getNum('wait')) ;
+}
+
+function drawStuff() {
+    if (running){
+        draw();
+    }
+    setTimeout(drawStuff,getNum('wait')) ;
+}
+
+run() ;
+</script>
+</body>
+</html>
+
