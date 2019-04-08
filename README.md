@@ -1,2 +1,2 @@
 # PHYS3266_NBodyGalaxy
-A repositoy for our final project in PHYS 3266 (Computational Physics) at Georgia Tech, Spring 2019
+A repository for our final project in PHYS 3266 (Computational Physics) at Georgia Tech, Spring 2019
