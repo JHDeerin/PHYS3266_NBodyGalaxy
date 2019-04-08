@@ -1,0 +1,30 @@
+body {
+
+}
+
+.sim-canvas-container {
+    position: relative;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 800px;
+
+    border: 1px solid black;
+}
+
+/* Sets up a 1:1 aspect ratio for the canvas*/
+.sim-canvas-container::before {
+    content: "";
+    display: block;
+    margin-top: 100%;
+}
+
+canvas {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+
+    width: 100%;
+    height: 100%;
+
+    border: 1px solid black;
+}
