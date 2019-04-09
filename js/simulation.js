@@ -38,7 +38,7 @@ class GravityCalculator {
                                     accels2[i].mult(2.0)).add(
                                     accels3[i].mult(2.0)).add(
                                     accels4[i]).mult(1.0 / 6.0);
-            this.objects[i].velocity.add(velocityChange);
+            this.objects[i].velocity = this.objects[i].velocity.add(velocityChange);
         }
     }
 
@@ -249,11 +249,11 @@ function initSimulation() {
     initCanvas();
 
     objects = [];
-    objects.push(new GravityObject(new Point3D(1.0, 0.0, 0.0),
-                                   new Point3D(0.0, 0.01, 0.0),
+    objects.push(new GravityObject(new Point3D(1.5, 0.0, 0.0),
+                                   new Point3D(0.0, 0.05, 0.0),
                                    1.0e8));
-    objects.push(new GravityObject(new Point3D(-1.0, 0.0, 0.0),
-                                   new Point3D(0.0, -0.01, 0.0),
+    objects.push(new GravityObject(new Point3D(-1.5, 0.0, 0.0),
+                                   new Point3D(0.0, -0.05, 0.0),
                                    1.0e8));
     objects.push(new GravityObject(new Point3D(0.0, 0.0, 0.0),
                                    new Point3D(0.0, 0.0, 0.0),
