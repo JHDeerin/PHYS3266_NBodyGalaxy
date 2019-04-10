@@ -23,7 +23,7 @@ class BarnesHutTree {
         }
 
         const originPos = new Point3D(0.0, 0.0, 0.0);
-        let root = new TreeNode(maxDistance, originPos);
+        let root = new TreeNode(maxDistance, originPos, 0);
         for (let i = 0; i < objectList.length; i++) {
             root.addObject(objectList[i], positionOffsets[i]);
         }
@@ -36,10 +36,12 @@ class BarnesHutTree {
 }
 
 class TreeNode {
-    constructor(nodeSize, nodePosition) {
+    constructor(nodeSize, nodePosition, depth) {
         this.size = nodeSize;
         this.pos = nodePosition;
+        this.depth = depth;
 
+        this.maxDepth = 100; //TODO: Pass this as an argument, or define as a static var?
         this.totalMass = 0;
         this.numChildObjects = 0;
         this.children = [];
@@ -47,7 +49,6 @@ class TreeNode {
     }
 
     getNetForceOnObject(object, bigG, positionOffset, theta) {
-        // TODO:
         let netForce = new Point3D(0.0, 0.0, 0.0);
         if (this.numChildObjects == 0) {
             // No objects, so this won't exert any force
@@ -61,7 +62,9 @@ class TreeNode {
             return netForce;
         }
         const distanceFactor = distance / this.size;
-        if (distanceFactor < theta || this.numChildObjects == 1) {
+        if (distanceFactor < theta 
+                || this.numChildObjects == 1 
+                || this.depth == this.maxDepth) {
             // Object is far enough away that we can use center-of-mass
             const numerator = bigG*this.totalMass*object.mass;
             return forceVector.normalize().mult(numerator).div(distance ** 2);
@@ -75,7 +78,8 @@ class TreeNode {
     }
 
     addObject(newObject, positionOffset) {
-        if (this.numChildObjects == 0) {
+        //TODO: Find a better way of avoiding stack overflow errors than capping the tree depth?
+        if (this.numChildObjects == 0 || this.depth >= this.maxDepth) {
             //TODO: Making this an object is somewhat arbitrary?
             this.children.push({obj: newObject, offset: positionOffset});
         } else if (this.numChildObjects == 1) {
@@ -113,31 +117,33 @@ class TreeNode {
     // Creates 8 new child nodes for the oct-tree
     createChildNodes() {
         const childSize = this.size / 2.0;
+        const newDepth = this.depth + 1;
         let childNodes = [];
 
+        //TODO: Refactor this as a for-loop, somehow?
         const topNorthWestOffset = new Point3D(-childSize, childSize, childSize);
-        childNodes.push(new TreeNode(childSize, this.pos.add(topNorthWestOffset)));
+        childNodes.push(new TreeNode(childSize, this.pos.add(topNorthWestOffset), newDepth));
 
         const topNorthEastOffset = new Point3D(childSize, childSize, childSize);
-        childNodes.push(new TreeNode(childSize, this.pos.add(topNorthEastOffset)));
+        childNodes.push(new TreeNode(childSize, this.pos.add(topNorthEastOffset), newDepth));
 
         const topSouthEastOffset = new Point3D(childSize, -childSize, childSize);
-        childNodes.push(new TreeNode(childSize, this.pos.add(topSouthEastOffset)));
+        childNodes.push(new TreeNode(childSize, this.pos.add(topSouthEastOffset), newDepth));
 
         const topSouthWestOffset = new Point3D(-childSize, -childSize, childSize);
-        childNodes.push(new TreeNode(childSize, this.pos.add(topSouthWestOffset)));
+        childNodes.push(new TreeNode(childSize, this.pos.add(topSouthWestOffset), newDepth));
 
         const bottomNorthWestOffset = new Point3D(-childSize, childSize, -childSize);
-        childNodes.push(new TreeNode(childSize, this.pos.add(bottomNorthWestOffset)));
+        childNodes.push(new TreeNode(childSize, this.pos.add(bottomNorthWestOffset), newDepth));
 
         const bottomNorthEastOffset = new Point3D(childSize, childSize, -childSize);
-        childNodes.push(new TreeNode(childSize, this.pos.add(bottomNorthEastOffset)));
+        childNodes.push(new TreeNode(childSize, this.pos.add(bottomNorthEastOffset), newDepth));
 
         const bottomSouthEastOffset = new Point3D(childSize, -childSize, -childSize);
-        childNodes.push(new TreeNode(childSize, this.pos.add(bottomSouthEastOffset)));
+        childNodes.push(new TreeNode(childSize, this.pos.add(bottomSouthEastOffset), newDepth));
 
         const bottomSouthWestOffset = new Point3D(-childSize, -childSize, -childSize);
-        childNodes.push(new TreeNode(childSize, this.pos.add(bottomSouthWestOffset)));
+        childNodes.push(new TreeNode(childSize, this.pos.add(bottomSouthWestOffset), newDepth));
 
         return childNodes;
     }

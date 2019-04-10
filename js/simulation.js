@@ -12,9 +12,9 @@ runSimulation();
 function initSimulation() {
     initCanvas();
 
-    let objects = spawnRandomObjects(500);
+    let objects = spawnRandomObjects(1000);
     //let objects = spawnTrinarySystem();
-    simulation = new GravityCalculator(objects, 6.6738e-11, 1.0);
+    simulation = new GravityCalculator(objects, 6.6738e-11, 1.0, 0.5);
 }
 
 function spawnRandomObjects(numObjects) {

@@ -9,10 +9,11 @@
  * Holds list of body objects and updates their positions
  */
 class GravityCalculator {
-    constructor(objectList, gravConstant, dt) {
+    constructor(objectList, gravConstant, dt, theta=0.5) {
         this.objects = objectList;
         this.bigG = gravConstant;
         this.dt = dt;
+        this.theta = theta;
     }
 
     /**
@@ -110,7 +111,7 @@ class GravityCalculator {
             const force = barnesHutTree.getNetForceOnObject(this.objects[i],
                                                             this.bigG,
                                                             positionOffsets[i],
-                                                            0.5);
+                                                            this.theta);
             forces.push(force);
         }
         return forces;
