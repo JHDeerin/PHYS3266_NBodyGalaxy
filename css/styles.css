@@ -10,8 +10,8 @@ body {
 
 main {
     margin: 0 auto;
-    width: 100%;
-    max-width: 800px;
+    width: calc(100% - 50px);
+    max-width: 1300px;
     padding: 1em;
     background: #282c34;
     /*box-shadow: 0px 0px 50px 10px rgba(200, 200, 220, 0.3);*/
@@ -27,11 +27,19 @@ header {
     border-radius: 3px;
 }
 
+.sim-container{
+    display: flex;
+    flex-direction: horizontal;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 .sim-canvas-container {
     position: relative;
-    margin: 0 auto;
+    margin: 0 10px;
     width: 100%;
     max-width: 800px;
+    flex-grow: 3;
 
     /*TODO: Why is this needed for canvas to display?*/
     border: 1px solid transparent;
@@ -51,4 +59,19 @@ canvas {
 
     width: 100%;
     height: 100%;
+}
+
+.sim-ui-controls {
+    display: flex;
+    flex-direction: column;
+    margin: 1em;
+    padding: 1em;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.sim-control {
+    display: block;
+    padding: 2px;
+    width: 100%;
 }

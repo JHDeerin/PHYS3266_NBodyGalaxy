@@ -22,8 +22,23 @@
             <h3>PHYS 3266 (Spring 2019), Georgia Institute of Technology</h3>
         </header>
 
-        <div class="sim-canvas-container">
-            <canvas id="sim-canvas"></canvas>
+        <div class="sim-container">
+            <div class="sim-canvas-container">
+                <canvas id="sim-canvas"></canvas>
+            </div>
+
+            <!-- Simulation UI Controls -->
+            <div class="sim-ui-controls">
+                <label class="sim-control">
+                    Number of Objects: <input type='number' id="numObj" value=100>
+                </label>
+                <label class="sim-control">
+                    Theta: <input type='number' id="numObj" value=0.5>
+                </label>
+                <label class="sim-control">
+                    Gravitational Constant: <input type='number' id="bigG" value=6.6738e-11>
+                </label>
+            </div>
         </div>
 
         <p>
