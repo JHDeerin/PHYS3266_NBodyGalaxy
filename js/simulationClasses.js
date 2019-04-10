@@ -2,6 +2,7 @@
  * Contains classes/utilities needed to run the physical simulation
  */
 
+ import { BarnesHutTree, TreeNode } from './barnesHutTree.js';
  //TODO: Might need to break this apart further into multiple files?
 
 /**
@@ -88,7 +89,7 @@ class GravityCalculator {
         }
 
         let accelerations = [];
-        let forces = this.getForceList(positionOffsets, offsetByHalf);
+        let forces = this.getForceList(positionOffsets);
         for (let i = 0; i < this.objects.length; i++) {
             const accel = this.objects[i].calcAcceleration(forces[i]);
             accelerations.push(accel);
@@ -105,33 +106,17 @@ class GravityCalculator {
     getForceList(positionOffsets) {
         // TODO: Currently O(N^2), update this for efficiency
 
+        const barnesHutTree = new BarnesHutTree(this.objects, positionOffsets);
         // calculate the total force acting on each object
         let forces = [];
         for (let i = 0; i < this.objects.length; i++) {
-            let force = new Point3D(0.0, 0.0, 0.0);
-            const currentPos = this.objects[i].location.add(positionOffsets[i]);
-            const currentMass = this.objects[i].mass
-            for (let j = 0; j < this.objects.length; j++) {
-                const isSameObject = i == j;
-                if (!isSameObject) {
-                    const otherPos = this.objects[j].location.add(positionOffsets[j]);
-                    const otherMass = this.objects[j].mass;
-
-                    const newForce = this.calcForce(currentPos, currentMass, otherPos, otherMass);
-                    force = force.add(newForce);
-                }
-            }
+            const force = barnesHutTree.getNetForceOnObject(this.objects[i],
+                                                            this.bigG,
+                                                            positionOffsets[i],
+                                                            0.5);
             forces.push(force);
         }
         return forces;
-    }
-
-    calcForce(obj1Pos, obj1Mass, obj2Pos, obj2Mass) {
-        const forceVector = obj2Pos.sub(obj1Pos);
-        const distance = forceVector.magnitude();
-
-        const numerator = this.bigG*obj1Mass*obj2Mass;
-        return forceVector.normalize().mult(numerator / (distance ** 2))
     }
 }
 
@@ -183,6 +168,12 @@ class Point3D {
         return new Point3D(this.x * scalar,
                            this.y * scalar,
                            this.z * scalar);
+    }
+
+    div(scalar) {
+        return new Point3D(this.x / scalar,
+                           this.y / scalar,
+                           this.z / scalar);
     }
 
     normalize() {
