@@ -5,6 +5,7 @@ import { GravityCalculator, GravityObject, Point3D } from './simulationClasses.j
 
 // TODO: Refactor this/expose it all to the UI
 let simulation = null;
+let isRunning = true;
 
 initSimulation();
 runSimulation();
@@ -12,9 +13,16 @@ runSimulation();
 function initSimulation() {
     initCanvas();
 
-    let objects = spawnRandomObjects(100);
+    //TODO: Separate out UI code from this if possible
+    let objects = spawnRandomObjects(getNum('numObj'));
     //let objects = spawnTrinarySystem();
-    simulation = new GravityCalculator(objects, 6.6738e-11, 1.0, 0.5);
+    const bigG = getNum('bigG');
+    const dt = getNum('dt');
+    const theta = getNum('theta');
+    simulation = new GravityCalculator(objects, bigG, dt, theta);
+
+    // Render sim so restarting while paused doesn't leave a blank canvas
+    renderSimulation(simulation);
 }
 
 function spawnRandomObjects(numObjects) {
@@ -51,7 +59,33 @@ function spawnTrinarySystem() {
 }
 
 function runSimulation(timePassed = 0) {
-    simulation.updatePositions();
-    renderSimulation(simulation);
+    if (isRunning) {
+        simulation.updatePositions();
+        renderSimulation(simulation);
+    }
     requestAnimationFrame(runSimulation);
 }
+
+// TODO: Refactor UI code into separate file?
+// UI Code
+function getNum(id){ /* gets the number from the GUI using the id */
+    return eval(document.getElementById(id).value) ;
+}
+
+document.addEventListener('click', function(event) {
+    if (!event.target.matches('#run')) {
+        return;
+    }
+
+    event.preventDefault();
+    isRunning = !isRunning;
+});
+
+document.addEventListener('click', function(event) {
+    if (!event.target.matches('#restart')) {
+        return;
+    }
+
+    event.preventDefault();
+    initSimulation();
+});

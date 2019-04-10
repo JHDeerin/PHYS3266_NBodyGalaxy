@@ -29,14 +29,21 @@
 
             <!-- Simulation UI Controls -->
             <div class="sim-ui-controls">
+                <div class="sim-control">
+                    <button id='run'>Run/Pause</button>
+                    <button id='restart'>Restart</button>
+                </div>
                 <label class="sim-control">
                     Number of Objects: <input type='number' id="numObj" value=100>
                 </label>
                 <label class="sim-control">
-                    Theta: <input type='number' id="numObj" value=0.5>
+                    Theta: <input type='number' id="theta" value=0.5>
                 </label>
                 <label class="sim-control">
                     Gravitational Constant: <input type='number' id="bigG" value=6.6738e-11>
+                </label>
+                <label class="sim-control">
+                    dt (seconds): <input type='number' id="dt" value=1.0>
                 </label>
             </div>
         </div>
