@@ -13,8 +13,8 @@ class BarnesHutTree {
         this.rootNode = this.buildNewTree(objectList, positionOffsets);
     }
 
+    // TODO: Refactor so position offsets are passed in more cleanly?
     buildNewTree(objectList, positionOffsets) {
-        //TODO: Incorporate position offsets so this works w/ RK4?
         //max box size will be equal to the maximum distance away from the origin
         let maxDistance = 0;
         for(let i = 0; i < objectList.length; i++) {
@@ -57,7 +57,7 @@ class TreeNode {
         const forceVector = this.centerOfMass.sub(object.location.add(positionOffset));
         const distance = forceVector.magnitude();
         if (distance < 1.0e-5) {
-            // likely computing force against self, so don't exert force
+            // likely computing force against self, so don't exert any force
             return netForce;
         }
         const distanceFactor = distance / this.size;

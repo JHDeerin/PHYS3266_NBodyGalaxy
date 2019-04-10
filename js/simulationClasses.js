@@ -32,17 +32,16 @@ class GravityCalculator {
         const velocities4 = this.getVelocityList(accels3, false);
 
         for (let i = 0; i < this.objects.length; i++) {
-            //TODO: Use vector adding functions
             let locationChange = velocities1[i].add(
                                     velocities2[i].mult(2.0)).add(
                                     velocities3[i].mult(2.0)).add(
-                                    velocities4[i]).mult(1.0 / 6.0);
+                                    velocities4[i]).div(6.0);
             this.objects[i].location = this.objects[i].location.add(locationChange);
 
             let velocityChange = accels1[i].add(
                                     accels2[i].mult(2.0)).add(
                                     accels3[i].mult(2.0)).add(
-                                    accels4[i]).mult(1.0 / 6.0);
+                                    accels4[i]).div(6.0);
             this.objects[i].velocity = this.objects[i].velocity.add(velocityChange);
         }
     }
@@ -98,14 +97,12 @@ class GravityCalculator {
     }
 
     /**
-     * Returns a list of the total force acting on each object in the simulation
+     * Returns a list of the net forces acting on each object in the simulation
      * 
      * @param positionOffsets Any offsets for the "ith" object to add to its
      * actual position during force calculations (needed for RK4 integration)
      */
     getForceList(positionOffsets) {
-        // TODO: Currently O(N^2), update this for efficiency
-
         const barnesHutTree = new BarnesHutTree(this.objects, positionOffsets);
         // calculate the total force acting on each object
         let forces = [];
@@ -131,7 +128,7 @@ class GravityObject {
     }
 
     calcAcceleration(forceVect) {
-        return forceVect.mult(1.0 / this.mass);
+        return forceVect.div(this.mass);
     }
 
     calcVelocity(accelerationVect = null) {
@@ -143,7 +140,8 @@ class GravityObject {
 }
 
 /**
- * A point or vector in 3D space
+ * A point or vector in 3D space (NOTE: Operations all return new COPIES of
+ * the point, instead of altering the point itself)
  */
 class Point3D {
     constructor(x, y, z) {
@@ -178,7 +176,7 @@ class Point3D {
 
     normalize() {
         const length = this.magnitude();
-        return this.mult(1.0 / length);
+        return this.div(length);
     }
 
     magnitude() {
