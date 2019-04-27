@@ -25,6 +25,7 @@ function initSimulation() {
 
     let objects = spawnRandomObjects(numObj, galaxyRadius*LIGHT_YEAR_METERS, maxSpeed);
     setMass(objects, getNum('minMass'), getNum('maxMass'));
+    setOrbitVel(objects, bigG); //TODO: Make velocity setting an option (this function currently overwrites UI velocity setting)
     //let objects = spawnTrinarySystem();
     
     simulation = new GravityCalculator(objects, bigG, dt, theta);
@@ -68,6 +69,28 @@ function setMass(objects, minMass, maxMass) {
     for (let i = 0; i < objects.length; i++) {
         const mass = randRange(minMass, maxMass);
         objects[i].mass = mass;
+    }
+}
+
+function setOrbitVel(objects, bigG) {
+    let totalMass = 0.0;
+    let centerOfMass = new Point3D(0.0, 0.0, 0.0);
+    for (let i = 0; i < objects.length; i++) {
+        totalMass += objects[i].mass;
+        centerOfMass = centerOfMass.add(objects[i].location);
+    }
+    centerOfMass = centerOfMass.div(objects.length);
+
+    for (let i = 0; i < objects.length; i++) {
+        // get vector pointing along perpendicular orbit around the origin
+        const towardsCenter = centerOfMass.sub(objects[i].location);
+        const otherVector = (towardsCenter.x == 0.0) ? new Point3D(1.0, 0.0, 0.0) : new Point3D(0.0, 0.0, -1.0);
+        const velVector = towardsCenter.cross(otherVector).normalize();
+
+        const radius = towardsCenter.magnitude();
+        const orbitSpeed = Math.sqrt(bigG * totalMass / radius);
+
+        objects[i].velocity = velVector.mult(orbitSpeed / 2.0);
     }
 }
 

@@ -175,6 +175,12 @@ class Point3D {
                            this.z / scalar);
     }
 
+    cross(otherPoint) {
+        return new Point3D(this.y*otherPoint.z - this.z*otherPoint.y,
+                            this.z*otherPoint.x - this.x*otherPoint.z,
+                            this.x*otherPoint.y - this.y*otherPoint.x);
+    }
+
     normalize() {
         const length = this.magnitude();
         return this.div(length);

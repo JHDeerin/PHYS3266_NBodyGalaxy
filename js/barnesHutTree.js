@@ -56,11 +56,12 @@ class TreeNode {
         }
 
         const forceVector = this.centerOfMass.sub(object.location.add(positionOffset));
-        const distance = forceVector.magnitude();
+        let distance = forceVector.magnitude();
         if (distance < 1.0e-5) {
             // likely computing force against self, so don't exert any force
             return netForce;
         }
+        distance += (6.0e7)**2; //TODO: Make this a variable (adds relaxation constant so near collisions don't "blow up")
         const distanceFactor = distance / this.size;
         if (distanceFactor < theta 
                 || this.numChildObjects == 1 
