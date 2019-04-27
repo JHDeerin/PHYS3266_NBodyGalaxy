@@ -11,7 +11,8 @@ initSimulation();
 runSimulation();
 
 function initSimulation() {
-    initCanvas();
+    const LIGHT_YEAR_METERS = 9.461e15;
+    initCanvas(getNum('screenWidth')*LIGHT_YEAR_METERS, getNum('cameraDist')*LIGHT_YEAR_METERS);
 
     //TODO: Separate out UI code from this if possible
     const numObj = getNum('numObj');
@@ -22,7 +23,8 @@ function initSimulation() {
     const dt = getNum('dt');
     const theta = getNum('theta');
 
-    let objects = spawnRandomObjects(numObj, galaxyRadius, maxSpeed);
+    let objects = spawnRandomObjects(numObj, galaxyRadius*LIGHT_YEAR_METERS, maxSpeed);
+    setMass(objects, getNum('minMass'), getNum('maxMass'));
     //let objects = spawnTrinarySystem();
     
     simulation = new GravityCalculator(objects, bigG, dt, theta);
@@ -31,21 +33,17 @@ function initSimulation() {
     renderSimulation(simulation);
 }
 
-function spawnRandomObjects(numObjects, maxDistLightYears, maxVelocity) {
+function spawnRandomObjects(numObjects, maxDist, maxVelocity) {
     let objects = [];
-    function randRange(min, max) {
-        return Math.random()*(max - min) + min;
-    }
 
-    const LIGHT_YEAR_METERS = 9.461e15;
-    const MAX_DIST = maxDistLightYears * LIGHT_YEAR_METERS;
     for (let i = 0; i < numObjects; i++) {
-        let position = new Point3D(randRange(-MAX_DIST, MAX_DIST),
-                                   randRange(-MAX_DIST, MAX_DIST),
-                                   0);//randRange(-MAX_DIST, MAX_DIST));
+        let position = new Point3D(randRange(-maxDist, maxDist),
+                                   randRange(-maxDist, maxDist),
+                                   randRange(-maxDist, maxDist));
+
         let velocity = new Point3D(randRange(-maxVelocity, maxVelocity),
                                    randRange(-maxVelocity, maxVelocity),
-                                   0);//randRange(-maxVelocity, maxVelocity));
+                                   randRange(-maxVelocity, maxVelocity));
         let mass = randRange(1.0e30, 8.0e30);
         objects.push(new GravityObject(position, velocity, mass));
     }
@@ -64,6 +62,17 @@ function spawnTrinarySystem() {
                                    new Point3D(0.0, 0.0, 0.0),
                                    1.25e8));
     return objects;
+}
+
+function setMass(objects, minMass, maxMass) {
+    for (let i = 0; i < objects.length; i++) {
+        const mass = randRange(minMass, maxMass);
+        objects[i].mass = mass;
+    }
+}
+
+function randRange(min, max) {
+    return Math.random()*(max - min) + min;
 }
 
 function runSimulation(timePassed = 0) {

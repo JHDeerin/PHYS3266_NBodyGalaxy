@@ -6,6 +6,8 @@ import { Point3D } from './simulationClasses.js';
 
 let canvas = null;
 let ctx = null;
+let cameraZ = -6.0e20;
+let MAX_STAR_DISTANCE = 1.0e21;
 
 function drawPlaceholderMessage() {
     initCanvas();
@@ -17,10 +19,13 @@ function drawPlaceholderMessage() {
     ctx.fillText('(Imagine Awesome Things Here)', canvas.width/2 - 150, canvas.height/2);
 }
 
-function initCanvas() {
+function initCanvas(screenWidthRealDist, cameraDist) {
     canvas = document.getElementById('sim-canvas');
     updateCanvasSize(canvas);
     ctx = canvas.getContext('2d');
+
+    MAX_STAR_DISTANCE = screenWidthRealDist;
+    cameraZ = -cameraDist;
 }
 
 function updateCanvasSize(canvas) {
@@ -42,8 +47,8 @@ function renderSimulation(sim) {
                 && screenPos.x < canvas.width
                 && screenPos.y < canvas.height) {
             // Poor man's 3D calculation for a camera at Z=-6.0e20 (in sim space)
-            const cameraZ = -6.0e20;
-            const zScale = (currentPos.z - cameraZ) / 1.0e20;
+            const scaling = Math.abs(cameraZ) / 10.0;
+            const zScale = (currentPos.z - cameraZ) / scaling;
             let squareSize = (zScale > 0) ? 50.0 / zScale : 0;
             ctx.fillRect(screenPos.x, screenPos.y, squareSize, squareSize);
         }
@@ -55,7 +60,6 @@ function renderSimulation(sim) {
  */
 function toScreenCoordinates(point) {
     // [-MAX_STAR_DISTANCE, MAX_STAR_DISTANCE] => [0, canvasWidth]
-    const MAX_STAR_DISTANCE = 1.0e21;
     const screenX = (point.x + MAX_STAR_DISTANCE) * canvas.width / (2.0 * MAX_STAR_DISTANCE);
     const screenY = (point.y + MAX_STAR_DISTANCE) * canvas.height / (2.0 * MAX_STAR_DISTANCE);
     return new Point3D(Math.floor(screenX), Math.floor(screenY), 0);
