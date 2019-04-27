@@ -14,31 +14,39 @@ function initSimulation() {
     initCanvas();
 
     //TODO: Separate out UI code from this if possible
-    let objects = spawnRandomObjects(getNum('numObj'));
-    //let objects = spawnTrinarySystem();
+    const numObj = getNum('numObj');
+    const galaxyRadius = getNum('maxDist');
+    const maxSpeed = getNum('maxSpeed');
+
     const bigG = getNum('bigG');
     const dt = getNum('dt');
     const theta = getNum('theta');
+
+    let objects = spawnRandomObjects(numObj, galaxyRadius, maxSpeed);
+    //let objects = spawnTrinarySystem();
+    
     simulation = new GravityCalculator(objects, bigG, dt, theta);
 
     // Render sim so restarting while paused doesn't leave a blank canvas
     renderSimulation(simulation);
 }
 
-function spawnRandomObjects(numObjects) {
+function spawnRandomObjects(numObjects, maxDistLightYears, maxVelocity) {
     let objects = [];
     function randRange(min, max) {
         return Math.random()*(max - min) + min;
     }
 
+    const LIGHT_YEAR_METERS = 9.461e15;
+    const MAX_DIST = maxDistLightYears * LIGHT_YEAR_METERS;
     for (let i = 0; i < numObjects; i++) {
-        let position = new Point3D(randRange(-1.5, 1.5),
-                                   randRange(-1.5, 1.5),
-                                   randRange(-1.5, 1.5));
-        let velocity = new Point3D(randRange(-0.05, 0.05),
-                                   randRange(-0.05, 0.05),
-                                   randRange(-0.05, 0.05));
-        let mass = randRange(1.0e7, 5.0e7);
+        let position = new Point3D(randRange(-MAX_DIST, MAX_DIST),
+                                   randRange(-MAX_DIST, MAX_DIST),
+                                   0);//randRange(-MAX_DIST, MAX_DIST));
+        let velocity = new Point3D(randRange(-maxVelocity, maxVelocity),
+                                   randRange(-maxVelocity, maxVelocity),
+                                   0);//randRange(-maxVelocity, maxVelocity));
+        let mass = randRange(1.0e30, 8.0e30);
         objects.push(new GravityObject(position, velocity, mass));
     }
     return objects;

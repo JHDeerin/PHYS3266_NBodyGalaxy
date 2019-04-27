@@ -31,9 +31,9 @@ function updateCanvasSize(canvas) {
 // TODO: Properly implement this
 function renderSimulation(sim) {
     //ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
     for (let i = 0; i < sim.objects.length; i++) {
         const currentPos = sim.objects[i].location;
         const screenPos = toScreenCoordinates(currentPos);
@@ -41,9 +41,9 @@ function renderSimulation(sim) {
         if (screenPos.x > 0 && screenPos.y > 0
                 && screenPos.x < canvas.width
                 && screenPos.y < canvas.height) {
-            // Poor man's 3D calculation for a camera at Z=-3 (in sim space)
-            const cameraZ = -3.0;
-            const zScale = (currentPos.z - cameraZ);
+            // Poor man's 3D calculation for a camera at Z=-6.0e20 (in sim space)
+            const cameraZ = -6.0e20;
+            const zScale = (currentPos.z - cameraZ) / 1.0e20;
             let squareSize = (zScale > 0) ? 50.0 / zScale : 0;
             ctx.fillRect(screenPos.x, screenPos.y, squareSize, squareSize);
         }
@@ -54,9 +54,10 @@ function renderSimulation(sim) {
  * Returns a 2D point with the pixel coordinates of the given 3D point
  */
 function toScreenCoordinates(point) {
-    // [-2.0, 2.0] => [0, canvasWidth]
-    const screenX = (point.x + 2.0) * canvas.width / 4.0;
-    const screenY = (point.y + 2.0) * canvas.height / 4.0;
+    // [-MAX_STAR_DISTANCE, MAX_STAR_DISTANCE] => [0, canvasWidth]
+    const MAX_STAR_DISTANCE = 1.0e21;
+    const screenX = (point.x + MAX_STAR_DISTANCE) * canvas.width / (2.0 * MAX_STAR_DISTANCE);
+    const screenY = (point.y + MAX_STAR_DISTANCE) * canvas.height / (2.0 * MAX_STAR_DISTANCE);
     return new Point3D(Math.floor(screenX), Math.floor(screenY), 0);
 }
 

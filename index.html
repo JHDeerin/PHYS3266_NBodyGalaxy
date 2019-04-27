@@ -40,10 +40,28 @@
                     Theta: <input type='number' id="theta" value=0.5>
                 </label>
                 <label class="sim-control">
-                    Gravitational Constant: <input type='number' id="bigG" value=6.6738e-11>
+                    <!-- Defaults to dt = 100,000 years per step -->
+                    dt (seconds): <input type='number' id="dt" value=3.1536e12>
+                </label>
+
+                <h3>Camera Controls</h3>
+
+                <h3>Simulation Details</h3>
+
+                <label class="sim-control">
+                    Galaxy Radius (light years): <input type='number' id="maxDist" value=50000>
                 </label>
                 <label class="sim-control">
-                    dt (seconds): <input type='number' id="dt" value=1.0>
+                    Max Initial Speed (m/s): <input type='number' id="maxSpeed" value=230000>
+                </label>
+                <label class="sim-control">
+                    Max Star Mass (kg): <input type='number' id="maxSpeed" value=8.0e30>
+                </label>
+                <label class="sim-control">
+                    Min Star Mass (kg): <input type='number' id="maxSpeed" value=1.0e30>
+                </label>
+                <label class="sim-control">
+                    Gravitational Constant: <input type='number' id="bigG" value=6.6738e-11>
                 </label>
             </div>
         </div>
