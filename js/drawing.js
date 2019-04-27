@@ -46,7 +46,7 @@ function renderSimulation(sim) {
         if (screenPos.x > 0 && screenPos.y > 0
                 && screenPos.x < canvas.width
                 && screenPos.y < canvas.height) {
-            // Poor man's 3D calculation for a camera at Z=-6.0e20 (in sim space)
+            // Poor man's 3D scaling calculation for a camera at negative Z
             const scaling = Math.abs(cameraZ) / 10.0;
             const zScale = (currentPos.z - cameraZ) / scaling;
             let squareSize = (zScale > 0) ? 50.0 / zScale : 0;
