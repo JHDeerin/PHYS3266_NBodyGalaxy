@@ -38,8 +38,8 @@ function renderSimulation(sim) {
     //ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'white';
     for (let i = 0; i < sim.objects.length; i++) {
+        ctx.fillStyle = getColor(sim.objects[i].mass)
         const currentPos = sim.objects[i].location;
         const screenPos = toScreenCoordinates(currentPos);
 
@@ -54,6 +54,73 @@ function renderSimulation(sim) {
         }
     }
 }
+
+function wavelengthToColor(wavelength) {
+var R,
+        G,
+        B,
+        alpha,
+        colorSpace,
+        wl = wavelength,
+        gamma = 1;
+
+
+    if (wl >= 380 && wl < 440) {
+        R = -1 * (wl - 440) / (440 - 380);
+        G = 0;
+        B = 1;
+   } else if (wl >= 440 && wl < 490) {
+       R = 0;
+       G = (wl - 440) / (490 - 440);
+       B = 1;  
+    } else if (wl >= 490 && wl < 510) {
+        R = 0;
+        G = 1;
+        B = -1 * (wl - 510) / (510 - 490);
+    } else if (wl >= 510 && wl < 580) {
+        R = (wl - 510) / (580 - 510);
+        G = 1;
+        B = 0;
+    } else if (wl >= 580 && wl < 645) {
+        R = 1;
+        G = -1 * (wl - 645) / (645 - 580);
+        B = 0.0;
+    } else if (wl >= 645 && wl <= 780) {
+        R = 1;
+        G = 0;
+        B = 0;
+    } else {
+        R = 0;
+        G = 0;
+        B = 0;
+    }
+
+    // intensty is lower at the edges of the visible spectrum.
+    if (wl > 780 || wl < 380) {
+        alpha = 0;
+    } else if (wl > 700) {
+        alpha = (780 - wl) / (780 - 700);
+    } else if (wl < 420) {
+        alpha = (wl - 380) / (420 - 380);
+    } else {
+        alpha = 1;
+    }
+
+   return colorSpace = ["rgba(" + (R * 100) + "%," + (G * 100) + "%," + (B * 100) + "%, " + alpha + ")"]
+   
+}
+
+function getColor(objMass){
+    let L = 3.828e26 * Math.pow(objMass/1.9885e30, 3.5);
+
+    let R = Math.pow((3*objMass)/(4*Math.PI *1.41e3),1/3);
+
+    let T = Math.pow(L/(4*Math.PI*5.670e-8*Math.pow(R,2)),1/4);
+
+    let lambda = 2.9e6/T;
+    return wavelengthToColor(lambda)
+}
+
 
 /**
  * Returns a 2D point with the pixel coordinates of the given 3D point
