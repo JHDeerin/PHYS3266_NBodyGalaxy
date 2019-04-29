@@ -46,7 +46,7 @@ function spawnRandomObjects(numObjects, maxDist, maxVelocity) {
                                    randRange(-maxVelocity, maxVelocity),
                                    randRange(-maxVelocity, maxVelocity));
         let mass = randRange(1.0e30, 8.0e30);
-        objects.push(new GravityObject(position, velocity, mass));
+        objects.push(new GravityObject(position, velocity, mass, i));
     }
     return objects;
 }
@@ -55,13 +55,16 @@ function spawnTrinarySystem() {
     let objects = [];
     objects.push(new GravityObject(new Point3D(1.5, 0.0, 1.0),
                                    new Point3D(0.0, 0.05, 0.0),
-                                   1.0e8));
+                                   1.0e8,
+                                   0));
     objects.push(new GravityObject(new Point3D(-1.5, 0.0, -1.0),
                                    new Point3D(0.0, -0.05, 0.0),
-                                   1.0e8));
+                                   1.0e8,
+                                   1));
     objects.push(new GravityObject(new Point3D(0.0, 0.0, 0.0),
                                    new Point3D(0.0, 0.0, 0.0),
-                                   1.25e8));
+                                   1.25e8,
+                                   2));
     return objects;
 }
 

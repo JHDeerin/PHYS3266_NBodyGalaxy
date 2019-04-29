@@ -61,10 +61,24 @@ class TreeNode {
             // likely computing force against self, so don't exert any force
             return netForce;
         }
-        distance += (6.0e7)**2; //TODO: Make this a variable (adds relaxation constant so near collisions don't "blow up")
+
+        
+        // TODO: If possible to do efficiently, move this to a separate method?
+        // TODO: Avoid recalculating this multiple times?
+        const collisionDist = 1.0e15; //TODO: Expose this in the UI?
+        if ((this.numChildObjects == 1)
+                && distance < collisionDist) {
+            for (let i = 0; i < this.children.length; i++) {
+                object.addCollidingObject(this.children[i].obj.id);
+                this.children[i].obj.addCollidingObject(object.id);
+            }
+        }
+
+        // calculate if objects should be merged
         const distanceFactor = distance / this.size;
+        distance += (6.0e7)**2; //TODO: Make this a variable (adds relaxation constant so near collisions don't "blow up")
         if (distanceFactor < theta 
-                || this.numChildObjects == 1 
+                || this.numChildObjects == 1
                 || this.depth == this.maxDepth) {
             // Object is far enough away that we can use center-of-mass
             const numerator = bigG*this.totalMass*object.mass;

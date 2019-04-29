@@ -45,30 +45,8 @@ class GravityCalculator {
                                     accels4[i]).div(6.0);
             this.objects[i].velocity = this.objects[i].velocity.add(velocityChange);
         }
-    }
 
-    getVelocityList(velocityOffsets = null, offsetByHalf = false) {
-        // if no offsets provided, assume all offsets are 0
-        if (!velocityOffsets) {
-            velocityOffsets = [];
-            for (let i = 0; i < this.objects.length; i++) {
-                velocityOffsets.push(new Point3D(0.0, 0.0, 0.0));
-            }
-        }
-        // divide each offset in half if option set
-        if (offsetByHalf) {
-            let newOffsets = [];
-            for (let i = 0; i < this.objects.length; i++) {
-                newOffsets.push(velocityOffsets[i].mult(0.5));
-            }
-            velocityOffsets = newOffsets;
-        }
-
-        let velocities = [];
-        for (let i = 0; i < this.objects.length; i++) {
-            velocities.push(this.objects[i].calcVelocity(velocityOffsets[i]))
-        }
-        return velocities.map(v => v.mult(this.dt));
+        this.mergeCollidingObjects();
     }
 
     getAccelList(positionOffsets = null, offsetByHalf = false) {
@@ -97,6 +75,30 @@ class GravityCalculator {
         return accelerations.map(a => a.mult(this.dt));
     }
 
+    getVelocityList(velocityOffsets = null, offsetByHalf = false) {
+        // if no offsets provided, assume all offsets are 0
+        if (!velocityOffsets) {
+            velocityOffsets = [];
+            for (let i = 0; i < this.objects.length; i++) {
+                velocityOffsets.push(new Point3D(0.0, 0.0, 0.0));
+            }
+        }
+        // divide each offset in half if option set
+        if (offsetByHalf) {
+            let newOffsets = [];
+            for (let i = 0; i < this.objects.length; i++) {
+                newOffsets.push(velocityOffsets[i].mult(0.5));
+            }
+            velocityOffsets = newOffsets;
+        }
+
+        let velocities = [];
+        for (let i = 0; i < this.objects.length; i++) {
+            velocities.push(this.objects[i].calcVelocity(velocityOffsets[i]))
+        }
+        return velocities.map(v => v.mult(this.dt));
+    }
+
     /**
      * Returns a list of the net forces acting on each object in the simulation
      * 
@@ -116,16 +118,81 @@ class GravityCalculator {
         }
         return forces;
     }
+
+    mergeCollidingObjects() {
+        let newObjects = [];
+        let objectCounter = 0;
+        for (let i = 0; i < this.objects.length; i++) {
+            if (!this.objects[i].hasBeenMerged) {
+                if (this.objects[i].colliding.size == 0) {
+                    // object isn't colliding, so we can just re-add it
+                    this.objects[i].id = objectCounter;
+                    newObjects.push(this.objects[i]);
+                    objectCounter++;
+                } else {
+                    // Object hasn't been merged yet, so let's merge it
+                    this.objects[i].hasBeenMerged = true;
+                    let newMergedObj = this.getMergedObject(this.objects[i]);
+
+                    newMergedObj.id = objectCounter;
+                    newObjects.push(newMergedObj);
+                    objectCounter++;
+                }
+            }
+        }
+
+        console.log(this.objects);
+
+        /*
+        let oldTotalMass = this.objects.reduce((sum, obj) => sum + obj.mass, 0);
+        let totalMass = newObjects.reduce((sum, obj) => sum + obj.mass, 0);
+        if (totalMass != oldTotalMass) {
+            console.log(`Merged Objects:`);
+            console.log(this.objects.filter(obj => obj.hasBeenMerged));
+            console.log(`Old mass: ${oldTotalMass}; New mass: ${totalMass}`);
+        }*/
+        
+        this.objects = newObjects;
+    }
+
+    getMergedObject(object) {
+        let toBeMerged = [object];
+        const collidingIDs = Array.from(object.colliding);
+
+        for (let i = 0; i < collidingIDs.length; i++) {
+            const currentID = collidingIDs[i]
+            if (!this.objects[currentID].hasBeenMerged) {
+                this.objects[currentID].hasBeenMerged = true;
+                toBeMerged.push(this.objects[currentID]);
+            }
+        }
+
+        let totalMass = toBeMerged.reduce((sum, obj) => sum + obj.mass, 0);
+        let centerOfMass = new Point3D(0.0, 0.0, 0.0);
+        let newVelocity = new Point3D(0.0, 0.0, 0.0);
+        for (let i = 0; i < toBeMerged.length; i++) {
+            centerOfMass = centerOfMass.add(toBeMerged[i].location.mult(toBeMerged[i].mass));
+            newVelocity = newVelocity.add(toBeMerged[i].velocity.mult(toBeMerged[i].mass));
+        }
+        centerOfMass = centerOfMass.div(totalMass);
+        newVelocity = newVelocity.div(totalMass);
+
+        return new GravityObject(centerOfMass, newVelocity, totalMass, 0);
+    }
 }
 
 /**
  * An object that can affect/is affected by gravity
  */
 class GravityObject {
-    constructor(location, velocity, mass) {
+    constructor(location, velocity, mass, id) {
         this.location = location;
         this.velocity = velocity;
         this.mass = mass;
+        this.id = id;   //ID is assumed to match object's index in list
+
+        this.colliding = new Set();
+        this.hasBeenMerged = false;
     }
 
     calcAcceleration(forceVect) {
@@ -137,6 +204,12 @@ class GravityObject {
             return this.velocity;
         }
         return this.velocity.add(accelerationVect);
+    }
+
+    addCollidingObject(collidingID) {
+        if (this.id !== collidingID) {
+            this.colliding.add(collidingID);
+        }
     }
 }
 
