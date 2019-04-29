@@ -39,7 +39,7 @@ function renderSimulation(sim) {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < sim.objects.length; i++) {
-        ctx.fillStyle = getColor(sim.objects[i].mass)
+        ctx.fillStyle = getColor(sim.objects[i].mass);
         const currentPos = sim.objects[i].location;
         const screenPos = toScreenCoordinates(currentPos);
 
