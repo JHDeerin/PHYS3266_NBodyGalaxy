@@ -9,8 +9,9 @@ import { Point3D, GravityObject } from './simulationClasses.js';
  * Constructs and holds the overall oct-tree of objects 
  */
 class BarnesHutTree {
-    constructor(objectList, positionOffsets) {
+    constructor(objectList, positionOffsets=null) {
         this.rootNode = this.buildNewTree(objectList, positionOffsets);
+        this.objects = objectList;
     }
 
     // TODO: Refactor so position offsets are passed in more cleanly?
@@ -25,13 +26,21 @@ class BarnesHutTree {
         const originPos = new Point3D(0.0, 0.0, 0.0);
         let root = new TreeNode(maxDistance, originPos, 0);
         for (let i = 0; i < objectList.length; i++) {
-            root.addObject(objectList[i], positionOffsets[i]);
+            // if no position offsets, just use (0,0,0) (i.e. no offset)
+            const posOffset = (positionOffsets) ? positionOffsets[i] : originPos;
+            root.addObject(objectList[i], posOffset);
         }
         return root;
     }
 
     getNetForceOnObject(object, bigG, positionOffset, theta=0.5) {
         return this.rootNode.getNetForceOnObject(object, bigG, positionOffset, theta);
+    }
+
+    markCollisions(collisionDist, theta=0.5) {
+        for (let i = 0; i < this.objects.length; i++) {
+            this.rootNode.markCollidingObjects(this.objects[i], collisionDist, theta);
+        }
     }
 }
 
@@ -48,6 +57,43 @@ class TreeNode {
         this.centerOfMass = new Point3D(0.0, 0.0, 0.0);
     }
 
+    // NOTE: Assumes that the collision distance is smaller than the minimum
+    // distance for calculating gravity
+    /**
+     * Adds the IDs of any objects close enough to collide w/ the given object
+     * to that object's "colliding" list
+     */
+    markCollidingObjects(object, collisionDist, theta) {
+        if (this.numChildObjects == 0) {
+            // No objects, so no collisions to check
+            return;
+        }
+
+        const forceVector = this.centerOfMass.sub(object.location);
+        let distance = forceVector.magnitude();
+
+        // Calculate if objects should be merged
+        if ((this.numChildObjects == 1) && distance < collisionDist) {
+            for (let i = 0; i < this.children.length; i++) {
+                object.addCollidingObject(this.children[i].obj.id);
+                this.children[i].obj.addCollidingObject(object.id);
+            }
+        }
+
+        const distanceFactor = distance / this.size;
+        if (distanceFactor < theta 
+            || this.numChildObjects == 1
+            || this.depth == this.maxDepth) {
+            // can't recurse any further, so just stop
+            return;
+        }
+
+        // otherwise, check all our children for collisions
+        for (let i = 0; i < this.children.length; i++) {
+            this.children[i].markCollidingObjects(object, collisionDist, theta);
+        }
+    }
+
     getNetForceOnObject(object, bigG, positionOffset, theta) {
         let netForce = new Point3D(0.0, 0.0, 0.0);
         if (this.numChildObjects == 0) {
@@ -62,19 +108,8 @@ class TreeNode {
             return netForce;
         }
 
-        
-        // TODO: If possible to do efficiently, move this to a separate method?
-        // TODO: Avoid recalculating this multiple times?
-        const collisionDist = 1.0e15; //TODO: Expose this in the UI?
-        if ((this.numChildObjects == 1)
-                && distance < collisionDist) {
-            for (let i = 0; i < this.children.length; i++) {
-                object.addCollidingObject(this.children[i].obj.id);
-                this.children[i].obj.addCollidingObject(object.id);
-            }
-        }
-
-        // calculate if objects should be merged
+        // If far enough away (or we're at the bottom of the tree), approximate
+        // gravitation force w/ this node's center of mass
         const distanceFactor = distance / this.size;
         distance += (6.0e7)**2; //TODO: Make this a variable (adds relaxation constant so near collisions don't "blow up")
         if (distanceFactor < theta 

@@ -3,7 +3,6 @@
 import { initCanvas, renderSimulation } from './drawing.js';
 import { GravityCalculator, GravityObject, Point3D } from './simulationClasses.js';
 
-// TODO: Refactor this/expose it all to the UI
 let simulation = null;
 let isRunning = true;
 
@@ -26,7 +25,6 @@ function initSimulation() {
     let objects = spawnRandomObjects(numObj, galaxyRadius*LIGHT_YEAR_METERS, maxSpeed);
     setMass(objects, getNum('minMass'), getNum('maxMass'));
     setOrbitVel(objects, bigG); //TODO: Make velocity setting an option (this function currently overwrites UI velocity setting)
-    //let objects = spawnTrinarySystem();
     
     simulation = new GravityCalculator(objects, bigG, dt, theta);
 
@@ -104,6 +102,7 @@ function randRange(min, max) {
 function runSimulation(timePassed = 0) {
     if (isRunning) {
         simulation.updatePositions();
+        simulation.mergeCollidingObjects(getNum('collisionDist'));
         renderSimulation(simulation);
     }
     requestAnimationFrame(runSimulation);

@@ -45,8 +45,6 @@ class GravityCalculator {
                                     accels4[i]).div(6.0);
             this.objects[i].velocity = this.objects[i].velocity.add(velocityChange);
         }
-
-        this.mergeCollidingObjects();
     }
 
     getAccelList(positionOffsets = null, offsetByHalf = false) {
@@ -119,7 +117,11 @@ class GravityCalculator {
         return forces;
     }
 
-    mergeCollidingObjects() {
+    mergeCollidingObjects(collisionDist) {
+        // TODO: Try to merge this w/ last RK4 tree to avoid 5 tree constructions per timestep?
+        const collisionTree = new BarnesHutTree(this.objects);
+        collisionTree.markCollisions(collisionDist, this.theta);
+
         let newObjects = [];
         let objectCounter = 0;
         for (let i = 0; i < this.objects.length; i++) {
@@ -141,17 +143,6 @@ class GravityCalculator {
             }
         }
 
-        console.log(this.objects);
-
-        /*
-        let oldTotalMass = this.objects.reduce((sum, obj) => sum + obj.mass, 0);
-        let totalMass = newObjects.reduce((sum, obj) => sum + obj.mass, 0);
-        if (totalMass != oldTotalMass) {
-            console.log(`Merged Objects:`);
-            console.log(this.objects.filter(obj => obj.hasBeenMerged));
-            console.log(`Old mass: ${oldTotalMass}; New mass: ${totalMass}`);
-        }*/
-        
         this.objects = newObjects;
     }
 
