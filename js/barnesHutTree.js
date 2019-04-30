@@ -181,23 +181,25 @@ class TreeNode {
 }
 
 function totalEnergy(){
-    let U = 0;
+    var U = 0;
     for(i=0;i<sim.objects.length;i++){
         for(j=0;j<sim.objects.length;j++){
-            let dvector = sim.objects[i].location - sim.objects[j].location
+            let dvector = sim.objects[i].location - sim.objects[j].location;
             if (dvector.magnitude() ==0){
-                continue
+                continue;
             }
-            U = U - (bigG*sim.objects[i].mass*sim.objects[j].mass)/(dvector.magnitude())
+            U = U - (bigG*sim.objects[i].mass*sim.objects[j].mass)/(dvector.magnitude());
         }
     }
-    let T = sim.objects.reduce(function(c){return (1/2)*c.mass*Math.pow(c.velocity.magnitude(),2)},0)
+    var T = sim.objects.reduce(function(c){return (1/2)*c.mass*Math.pow(c.velocity.magnitude(),2)},0);
+    return (T + U);
 }
-return T + U
+    
 
 function totalAngMomentum(){
-    let A = sim.objects.reduce(function(d){return Math.cross(d.location,d.velocity).magnitude()},0)
+    var A = sim.objects.reduce(function(d){return Math.cross(d.location,d.velocity).magnitude()},0);
+    return A;
 }
-return A
+
 
 export { BarnesHutTree, TreeNode };
