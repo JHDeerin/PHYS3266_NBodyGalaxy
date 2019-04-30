@@ -3,6 +3,8 @@
  */
 
 import { Point3D } from './simulationClasses.js';
+import {Plot} from './AkPlot.js';
+import {totalEnergy,totalAngMomentum} from './barnesHutTree.js'
 
 let canvas = null;
 let canvas1 = null;
@@ -11,6 +13,10 @@ let ctx = null;
 let cameraZ = -6.0e20;
 let MAX_STAR_DISTANCE = 1.0e21;
 
+var plt1 = null;
+var plt2 = null;
+var Energycurve = null ; 
+var AngMomentumcurve = null ;
 function drawPlaceholderMessage() {
     initCanvas();
 
@@ -22,23 +28,60 @@ function drawPlaceholderMessage() {
 }
 
 function initCanvas(screenWidthRealDist, cameraDist) {
+
     canvas = document.getElementById('sim-canvas');
-    canvas1 = document.getElementById('sim-canvas');
-    canvas2 = document.getElementById('sim-canvas');
+    canvas1 = document.getElementById('Energy-canvas');
+    canvas2 = document.getElementById('AngMomentum-canvas');
     updateCanvasSize(canvas);
+    updateCanvasSize(canvas1);
+    updateCanvasSize(canvas2);
     ctx = canvas.getContext('2d');
 
     MAX_STAR_DISTANCE = screenWidthRealDist;
     cameraZ = -cameraDist;
+    initializePlots();
 }
 
 function updateCanvasSize(canvas) {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
 }
+function initializePlots(){
+    plt1 = new Plot(canvas1);
+    plt1.ylimits=[0,1e39] ;
+    plt1.xlimits=[0,9e12];
+    plt1.grid = 'on' ;
+    plt1.xticks.noDivs = 5 ;
+    plt1.yticks.noDivs = 4 ;
+    plt1.margins.right = 20 ;
+    plt1.xticks.precision = 0 ;
+    plt1.yticks.precision = 0 ;
+    plt1.xlabel = 'Time' ;
+    plt1.ylabel = 'Energy' ;
+    plt1.legend.location = [430,20] ;
+
+    plt2 = new Plot(canvas2);
+    plt2.ylimits=[0,1e30] ;
+    plt2.xlimits=[0,9e11] ;
+    plt2.grid = 'on' ;
+    plt2.xticks.noDivs = 5 ;
+    plt2.yticks.noDivs = 4 ;
+    plt2.margins.right = 20 ;
+    plt2.xticks.precision = 0 ;
+    plt2.yticks.precision = 0 ;
+    plt2.xlabel = 'time' ;
+    plt2.ylabel = 'Angular Momentum' ;
+    plt2.legend.location = [430,20] ;
+
+    Energycurve = plt1.addCurveFromPoints() ;
+    AngMomentumcurve = plt2.addCurveFromPoints() ;
+
+    Energycurve.name = 'T+U'
+    AngMomentumcurve.name = 'L'
+}
 
 // TODO: Properly implement this
-function renderSimulation(sim) {
+function renderSimulation(sim, simulation_time) {
     //ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -57,6 +100,8 @@ function renderSimulation(sim) {
             ctx.fillRect(screenPos.x, screenPos.y, squareSize, squareSize);
         }
     }
+     Energycurve.draw(simulation_time,totalEnergy(sim));
+     AngMomentumcurve.draw(simulation_time,totalAngMomentum(sim));
 }
 
 function wavelengthToColor(wavelength) {

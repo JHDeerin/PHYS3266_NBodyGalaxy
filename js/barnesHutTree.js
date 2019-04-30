@@ -180,25 +180,25 @@ class TreeNode {
     }
 }
 
-function totalEnergy() {
+function totalEnergy(sim) {
     var U = 0;
-    for(i=0;i<sim.objects.length;i++){
-        for(j=0;j<sim.objects.length;j++){
-            let dvector = sim.objects[i].location - sim.objects[j].location;
+    for(var i=0;i<sim.objects.length;i++){
+        for(var j=0;j<sim.objects.length;j++){
+            let dvector = sim.objects[i].location.sub(sim.objects[j].location);
             if (dvector.magnitude() ==0){
                 continue;
             }
-            U = U - (bigG*sim.objects[i].mass*sim.objects[j].mass)/(dvector.magnitude());
+            U = U - (sim.bigG*sim.objects[i].mass*sim.objects[j].mass)/(dvector.magnitude());
         }
     }
-    var T = sim.objects.reduce(function(c){return (1/2)*c.mass*Math.pow(c.velocity.magnitude(),2)},0);
-
-    return (T + U);
+    var T = sim.objects.reduce(function(totalKineticE,c){return totalKineticE + (1./2.)*c.mass*Math.pow(c.velocity.magnitude(),2)},0);
+    console.log(T-(1/2)*U);
+    return (T - (1./2.)*U);
 }
     
 
-function totalAngMomentum() {
-    var A = sim.objects.reduce(function(d){return Math.cross(d.location,d.velocity).magnitude()},0);
+function totalAngMomentum(sim) {
+    var A = sim.objects.reduce(function(totalAngMoment,d){return totalAngMoment + d.location.cross(d.velocity).magnitude()},0);
     
     return A;
 }

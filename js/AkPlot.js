@@ -1302,3 +1302,4 @@ class Plot{
         return nc ;
     }
 }
+export {Plot};

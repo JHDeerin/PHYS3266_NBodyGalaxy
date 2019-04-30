@@ -56,6 +56,14 @@ header {
     margin-top: 100%;
 }
 
+#Energy-canvas {
+    background: white;
+}
+
+#AngMomentum-canvas {
+    background: white;
+}
+
 canvas {
     position: absolute;
     margin: 0;
