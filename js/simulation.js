@@ -2,6 +2,7 @@
 
 import { initCanvas, renderSimulation } from './drawing.js';
 import { GravityCalculator, GravityObject, Point3D } from './simulationClasses.js';
+import {totalEnergy, totalAngMomentum} from './barnesHutTree.js';
 
 // TODO: Refactor this/expose it all to the UI
 let simulation = null;
@@ -27,7 +28,38 @@ function initSimulation() {
     setMass(objects, getNum('minMass'), getNum('maxMass'));
     setOrbitVel(objects, bigG); //TODO: Make velocity setting an option (this function currently overwrites UI velocity setting)
     //let objects = spawnTrinarySystem();
-    
+    var plt1 = new Plot(canvas1);
+    plt1.ylimits=[-3,1] ;
+    plt1.xlimits=[0,100] ;
+    plt1.grid = 'on' ;
+    plt1.xticks.noDivs = 5 ;
+    plt1.yticks.noDivs = 4 ;
+    plt1.margins.right = 20 ;
+    plt1.xticks.precision = 0 ;
+    plt1.yticks.precision = 0 ;
+    plt1.xlabel = 'Time' ;
+    plt1.ylabel = 'Energy' ;
+    plt1.legend.location = [430,20] ;
+
+    var plt2 = new Plot(canvas2);
+    plt2.ylimits=[-3,1] ;
+    plt2.xlimits=[0,100] ;
+    plt2.grid = 'on' ;
+    plt2.xticks.noDivs = 5 ;
+    plt2.yticks.noDivs = 4 ;
+    plt2.margins.right = 20 ;
+    plt2.xticks.precision = 0 ;
+    plt2.yticks.precision = 0 ;
+    plt2.xlabel = 'time' ;
+    plt2.ylabel = 'Angular Momentum' ;
+    plt2.legend.location = [430,20] ;
+
+    var Energycurve = plt1.addCurveFromPoints() ; 
+    var AngMomentumcurve = plt2.addCurveFromPoints() ;
+
+    Energycurve.name = 'T+U'
+    AngMomentumcurve.name = 'L'
+
     simulation = new GravityCalculator(objects, bigG, dt, theta);
 
     // Render sim so restarting while paused doesn't leave a blank canvas
@@ -102,6 +134,8 @@ function runSimulation(timePassed = 0) {
     if (isRunning) {
         simulation.updatePositions();
         renderSimulation(simulation);
+        Energycurve.draw(timePassed,totalEnergy())
+        AngMomentumcurve.draw(timePassed,totalAngMomentum())
     }
     requestAnimationFrame(runSimulation);
 }

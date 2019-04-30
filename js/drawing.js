@@ -5,6 +5,8 @@
 import { Point3D } from './simulationClasses.js';
 
 let canvas = null;
+let canvas1 = null;
+let canvas2 = null;
 let ctx = null;
 let cameraZ = -6.0e20;
 let MAX_STAR_DISTANCE = 1.0e21;
@@ -21,6 +23,8 @@ function drawPlaceholderMessage() {
 
 function initCanvas(screenWidthRealDist, cameraDist) {
     canvas = document.getElementById('sim-canvas');
+    canvas1 = document.getElementById('sim-canvas');
+    canvas2 = document.getElementById('sim-canvas');
     updateCanvasSize(canvas);
     ctx = canvas.getContext('2d');
 

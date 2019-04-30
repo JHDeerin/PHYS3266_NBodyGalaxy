@@ -204,4 +204,4 @@ function totalAngMomentum() {
 }
 
 
-export { BarnesHutTree, TreeNode };
+export { BarnesHutTree, TreeNode, totalEnergy, totalAngMomentum };
