@@ -180,7 +180,7 @@ class TreeNode {
     }
 }
 
-function totalEnergy(){
+function totalEnergy() {
     var U = 0;
     for(i=0;i<sim.objects.length;i++){
         for(j=0;j<sim.objects.length;j++){
@@ -192,12 +192,14 @@ function totalEnergy(){
         }
     }
     var T = sim.objects.reduce(function(c){return (1/2)*c.mass*Math.pow(c.velocity.magnitude(),2)},0);
+
     return (T + U);
 }
     
 
-function totalAngMomentum(){
+function totalAngMomentum() {
     var A = sim.objects.reduce(function(d){return Math.cross(d.location,d.velocity).magnitude()},0);
+    
     return A;
 }
 
