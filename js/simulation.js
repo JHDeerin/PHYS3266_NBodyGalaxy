@@ -106,10 +106,13 @@ function randRange(min, max) {
 
 function runSimulation(timePassed = 0) {
     if (isRunning) {
-        simulation.updatePositions();
-        simulation.mergeCollidingObjects(getNum('collisionDist'));
+        const skip = getNum('skip') 
+        for (let i = 0; i < skip; i++) {
+            simulation.updatePositions();
+            simulation.mergeCollidingObjects(getNum('collisionDist'));
+        }
         renderSimulation(simulation,simulation_time);
-        simulation_time += simulation.dt;
+        simulation_time += simulation.dt*skip;
     }
     requestAnimationFrame(runSimulation);
 }

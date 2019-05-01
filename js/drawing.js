@@ -120,7 +120,7 @@ function renderSimulation(sim, simulation_time) {
         ptime -=plotPeriod*sim.dt ;
         plt1.xlimits = [ xl[0]+plotPeriod, xl[1]+plotPeriod ] ;
         plt2.xlimits = [ xl[0]+plotPeriod, xl[1]+plotPeriod ] ;
-        plt1.init() ;
+        plt1.init();
         plt2.init();
     }
      Energycurve.plot(current_timestep,totalEnergy(sim));
