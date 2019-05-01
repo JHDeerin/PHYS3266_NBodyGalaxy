@@ -4,7 +4,6 @@ import { initCanvas, renderSimulation } from './drawing.js';
 import { GravityCalculator, GravityObject, Point3D } from './simulationClasses.js';
 import {totalEnergy, totalAngMomentum} from './barnesHutTree.js';
 
-// TODO: Refactor this/expose it all to the UI
 let simulation = null;
 let isRunning = true;
 var simulation_time = 0;
@@ -28,7 +27,6 @@ function initSimulation() {
     let objects = spawnRandomObjects(numObj, galaxyRadius*LIGHT_YEAR_METERS, maxSpeed);
     setMass(objects, getNum('minMass'), getNum('maxMass'));
     setOrbitVel(objects, bigG); //TODO: Make velocity setting an option (this function currently overwrites UI velocity setting)
-    //let objects = spawnTrinarySystem();
     
 
     simulation = new GravityCalculator(objects, bigG, dt, theta);
@@ -51,7 +49,7 @@ function spawnRandomObjects(numObjects, maxDist, maxVelocity) {
                                    randRange(-maxVelocity, maxVelocity),
                                    randRange(-maxVelocity, maxVelocity));
         let mass = randRange(1.0e30, 8.0e30);
-        objects.push(new GravityObject(position, velocity, mass));
+        objects.push(new GravityObject(position, velocity, mass, i));
     }
     return objects;
 }
@@ -60,13 +58,16 @@ function spawnTrinarySystem() {
     let objects = [];
     objects.push(new GravityObject(new Point3D(1.5, 0.0, 1.0),
                                    new Point3D(0.0, 0.05, 0.0),
-                                   1.0e8));
+                                   1.0e8,
+                                   0));
     objects.push(new GravityObject(new Point3D(-1.5, 0.0, -1.0),
                                    new Point3D(0.0, -0.05, 0.0),
-                                   1.0e8));
+                                   1.0e8,
+                                   1));
     objects.push(new GravityObject(new Point3D(0.0, 0.0, 0.0),
                                    new Point3D(0.0, 0.0, 0.0),
-                                   1.25e8));
+                                   1.25e8,
+                                   2));
     return objects;
 }
 
@@ -106,6 +107,7 @@ function randRange(min, max) {
 function runSimulation(timePassed = 0) {
     if (isRunning) {
         simulation.updatePositions();
+        simulation.mergeCollidingObjects(getNum('collisionDist'));
         renderSimulation(simulation,simulation_time);
         simulation_time += simulation.dt;
     }
