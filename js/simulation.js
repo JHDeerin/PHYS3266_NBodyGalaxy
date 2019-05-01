@@ -2,9 +2,11 @@
 
 import { initCanvas, renderSimulation } from './drawing.js';
 import { GravityCalculator, GravityObject, Point3D } from './simulationClasses.js';
+import {totalEnergy, totalAngMomentum} from './barnesHutTree.js';
 
 let simulation = null;
 let isRunning = true;
+var simulation_time = 0;
 
 initSimulation();
 runSimulation();
@@ -26,7 +28,10 @@ function initSimulation() {
     setMass(objects, getNum('minMass'), getNum('maxMass'));
     setOrbitVel(objects, bigG); //TODO: Make velocity setting an option (this function currently overwrites UI velocity setting)
     
+
     simulation = new GravityCalculator(objects, bigG, dt, theta);
+
+    simulation_time = 0;
 
     // Render sim so restarting while paused doesn't leave a blank canvas
     renderSimulation(simulation);
@@ -103,7 +108,8 @@ function runSimulation(timePassed = 0) {
     if (isRunning) {
         simulation.updatePositions();
         simulation.mergeCollidingObjects(getNum('collisionDist'));
-        renderSimulation(simulation);
+        renderSimulation(simulation,simulation_time);
+        simulation_time += simulation.dt;
     }
     requestAnimationFrame(runSimulation);
 }
@@ -131,3 +137,5 @@ document.addEventListener('click', function(event) {
     event.preventDefault();
     initSimulation();
 });
+
+export {getNum} ;
