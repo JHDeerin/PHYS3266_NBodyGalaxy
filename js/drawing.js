@@ -86,7 +86,12 @@ function renderSimulation(sim, simulation_time) {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < sim.objects.length; i++) {
-        ctx.fillStyle = getColor(sim.objects[i].mass);
+        if(getWavelength(sim.objects[i].mass)>=380 && getWavelength(sim.objects[i].mass)<=780) {
+             ctx.fillStyle = wavelengthToColor(getWavelength(sim.objects[i].mass)) ;
+        }
+        else{
+            ctx.fillStyle = 'white';
+        }
         const currentPos = sim.objects[i].location;
         const screenPos = toScreenCoordinates(currentPos);
 
@@ -159,7 +164,7 @@ var R,
    
 }
 
-function getColor(objMass){
+function getWavelength(objMass){
     let L = 3.828e26 * Math.pow(objMass/1.9885e30, 3.5);
 
     let R = Math.pow((3*objMass)/(4*Math.PI *1.41e3),1/3);
@@ -167,7 +172,7 @@ function getColor(objMass){
     let T = Math.pow(L/(4*Math.PI*5.670e-8*Math.pow(R,2)),1/4);
 
     let lambda = 2.9e6/T;
-    return wavelengthToColor(lambda)
+    return lambda
 }
 
 

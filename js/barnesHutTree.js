@@ -198,7 +198,7 @@ function totalEnergy(sim) {
     
 
 function totalAngMomentum(sim) {
-    var A = sim.objects.reduce(function(totalAngMoment,d){return totalAngMoment + d.location.cross(d.velocity).magnitude()},0);
+    var A = sim.objects.reduce(function(totalAngMoment,d){return totalAngMoment + d.location.cross(d.mass*d.velocity).magnitude()},0);
     
     return A;
 }
