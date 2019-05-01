@@ -149,6 +149,7 @@ class TreeNode {
         return childNodes;
     }
 
+
     /**
      * Returns the index of the octant the given position is in, relative to the
      * center of the node (order should be starting at the top-left and going
@@ -179,4 +180,28 @@ class TreeNode {
     }
 }
 
-export { BarnesHutTree, TreeNode };
+function totalEnergy(sim) {
+    var U = 0;
+    for(var i=0;i<sim.objects.length;i++){
+        for(var j=0;j<sim.objects.length;j++){
+            let dvector = sim.objects[i].location.sub(sim.objects[j].location);
+            if (dvector.magnitude() ==0){
+                continue;
+            }
+            U = U - (sim.bigG*sim.objects[i].mass*sim.objects[j].mass)/(dvector.magnitude());
+        }
+    }
+    var T = sim.objects.reduce(function(totalKineticE,c){return totalKineticE + (1./2.)*c.mass*Math.pow(c.velocity.magnitude(),2)},0);
+    console.log(T-(1/2)*U);
+    return (T - (1./2.)*U);
+}
+    
+
+function totalAngMomentum(sim) {
+    var A = sim.objects.reduce(function(totalAngMoment,d){return totalAngMoment + d.location.cross(d.mass*d.velocity).magnitude()},0);
+    
+    return A;
+}
+
+
+export { BarnesHutTree, TreeNode, totalEnergy, totalAngMomentum };
