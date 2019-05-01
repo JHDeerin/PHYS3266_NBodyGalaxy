@@ -2,7 +2,8 @@
  * Contains functions/classes related to rendering the simulation on the screen
  */
 
-import { Point3D } from './simulationClasses.js';
+import { Point3D} from './simulationClasses.js';
+import {getNum} from './simulation.js';
 import {Plot} from './AkPlot.js';
 import {totalEnergy,totalAngMomentum} from './barnesHutTree.js'
 
@@ -12,6 +13,8 @@ let canvas2 = null;
 let ctx = null;
 let cameraZ = -6.0e20;
 let MAX_STAR_DISTANCE = 1.0e21;
+let plotPeriod = getNum('plotPeriod');
+var ptime = null;
 
 var plt1 = null;
 var plt2 = null;
@@ -49,7 +52,7 @@ function updateCanvasSize(canvas) {
 function initializePlots(){
     plt1 = new Plot(canvas1);
     plt1.ylimits=[0,1e39] ;
-    plt1.xlimits=[0,9e12];
+    plt1.xlimits=[0,getNum('plotPeriod')];
     plt1.grid = 'on' ;
     plt1.xticks.noDivs = 5 ;
     plt1.yticks.noDivs = 4 ;
@@ -61,8 +64,8 @@ function initializePlots(){
     plt1.legend.location = [430,20] ;
 
     plt2 = new Plot(canvas2);
-    plt2.ylimits=[0,1e30] ;
-    plt2.xlimits=[0,9e11] ;
+    plt2.ylimits=[0,1e20] ;
+    plt2.xlimits=[0,getNum('plotPeriod')] ;
     plt2.grid = 'on' ;
     plt2.xticks.noDivs = 5 ;
     plt2.yticks.noDivs = 4 ;
@@ -83,14 +86,20 @@ function initializePlots(){
 // TODO: Properly implement this
 function renderSimulation(sim, simulation_time) {
     //ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let current_timestep = Math.round(simulation_time/sim.dt);
+    let plotPeriod = getNum('plotPeriod');
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     for (let i = 0; i < sim.objects.length; i++) {
-        if(getWavelength(sim.objects[i].mass)>=380 && getWavelength(sim.objects[i].mass)<=780) {
-             ctx.fillStyle = wavelengthToColor(getWavelength(sim.objects[i].mass)) ;
+        var const_currentwavelength = getWavelength(sim.objects[i].mass)
+        if(const_currentwavelength>=380 && const_currentwavelength<=780) {
+             ctx.fillStyle = wavelengthToColor(const_currentwavelength) ;
         }
-        else{
-            ctx.fillStyle = 'white';
+        else if (const_currentwavelength<=380){
+            ctx.fillStyle = "rgb(135, 1, 14)";
+        }
+        else if (const_currentwavelength>=780){
+            ctx.fillStyle = "rgb(0, 85, 155)";
         }
         const currentPos = sim.objects[i].location;
         const screenPos = toScreenCoordinates(currentPos);
@@ -105,8 +114,17 @@ function renderSimulation(sim, simulation_time) {
             ctx.fillRect(screenPos.x, screenPos.y, squareSize, squareSize);
         }
     }
-     Energycurve.draw(simulation_time,totalEnergy(sim));
-     AngMomentumcurve.draw(simulation_time,totalAngMomentum(sim));
+    ptime += sim.dt;
+    if(ptime>plotPeriod*sim.dt){
+        var xl = plt1.xlimits ;
+        ptime -=plotPeriod*sim.dt ;
+        plt1.xlimits = [ xl[0]+plotPeriod, xl[1]+plotPeriod ] ;
+        plt2.xlimits = [ xl[0]+plotPeriod, xl[1]+plotPeriod ] ;
+        plt1.init() ;
+        plt2.init();
+    }
+     Energycurve.plot(current_timestep,totalEnergy(sim));
+     AngMomentumcurve.plot(current_timestep,totalAngMomentum(sim));
 }
 
 function wavelengthToColor(wavelength) {

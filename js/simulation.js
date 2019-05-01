@@ -135,3 +135,5 @@ document.addEventListener('click', function(event) {
     event.preventDefault();
     initSimulation();
 });
+
+export {getNum} ;
