@@ -96,10 +96,10 @@ function renderSimulation(sim, simulation_time) {
              ctx.fillStyle = wavelengthToColor(const_currentwavelength) ;
         }
         else if (const_currentwavelength<=380){
-            ctx.fillStyle = "rgb(135, 1, 14)";
+            ctx.fillStyle = "rgb(0, 85, 155)";
         }
         else if (const_currentwavelength>=780){
-            ctx.fillStyle = "rgb(0, 85, 155)";
+            ctx.fillStyle = "rgb(135, 1, 14)";
         }
         const currentPos = sim.objects[i].location;
         const screenPos = toScreenCoordinates(currentPos);
