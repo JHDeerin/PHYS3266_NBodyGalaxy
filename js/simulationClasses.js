@@ -117,6 +117,17 @@ class GravityCalculator {
         return forces;
     }
 
+    getCenterOfMass() {
+        let totalMass = 0.0;
+        let centerOfMass = new Point3D(0.0, 0.0, 0.0);
+        for (let i = 0; i < this.objects.length; i++) {
+            totalMass += this.objects[i].mass;
+            centerOfMass = centerOfMass.add(this.objects[i].location);
+        }
+        centerOfMass = centerOfMass.div(this.objects.length);
+        return centerOfMass;
+    }
+
     mergeCollidingObjects(collisionDist) {
         // TODO: Try to merge this w/ last RK4 tree to avoid 5 tree constructions per timestep?
         const collisionTree = new BarnesHutTree(this.objects);

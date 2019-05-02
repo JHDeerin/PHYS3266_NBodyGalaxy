@@ -90,6 +90,12 @@ function renderSimulation(sim, simulation_time) {
     let plotPeriod = getNum('plotPeriod');
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // TODO: Get checkbox more cleanly?
+    let originPt = new Point3D(0.0, 0.0, 0.0);
+    if (document.getElementById('follow').checked) {
+        originPt = sim.getCenterOfMass();
+    }
     for (let i = 0; i < sim.objects.length; i++) {
         var const_currentwavelength = getWavelength(sim.objects[i].mass)
         if(const_currentwavelength>=380 && const_currentwavelength<=780) {
@@ -102,14 +108,14 @@ function renderSimulation(sim, simulation_time) {
             ctx.fillStyle = "rgb(0, 85, 155)";
         }
         const currentPos = sim.objects[i].location;
-        const screenPos = toScreenCoordinates(currentPos);
+        const screenPos = toScreenCoordinates(currentPos, originPt);
 
         if (screenPos.x > 0 && screenPos.y > 0
                 && screenPos.x < canvas.width
                 && screenPos.y < canvas.height) {
             // Poor man's 3D scaling calculation for a camera at negative Z
             const scaling = Math.abs(cameraZ) / 10.0;
-            const zScale = (currentPos.z - cameraZ) / scaling;
+            const zScale = (currentPos.z - (cameraZ + originPt.z)) / scaling;
             let squareSize = (zScale > 0) ? 50.0 / zScale : 0;
             ctx.fillRect(screenPos.x, screenPos.y, squareSize, squareSize);
         }
@@ -197,8 +203,9 @@ function getWavelength(objMass){
 /**
  * Returns a 2D point with the pixel coordinates of the given 3D point
  */
-function toScreenCoordinates(point) {
+function toScreenCoordinates(point, originPt) {
     // [-MAX_STAR_DISTANCE, MAX_STAR_DISTANCE] => [0, canvasWidth]
+    point = point.sub(originPt);
     const screenX = (point.x + MAX_STAR_DISTANCE) * canvas.width / (2.0 * MAX_STAR_DISTANCE);
     const screenY = (point.y + MAX_STAR_DISTANCE) * canvas.height / (2.0 * MAX_STAR_DISTANCE);
     return new Point3D(Math.floor(screenX), Math.floor(screenY), 0);
