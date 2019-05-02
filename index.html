@@ -37,9 +37,13 @@
                 </div>
                 <label class="sim-control">
                     Number of Objects: <input type='number' id="numObj" value=100>
+                    <p><i>Current Objects: <span id='numObjOutput'>x</span></i></p>
                 </label>
                 <label class="sim-control">
                     Theta: <input type='number' id="theta" value=0.5>
+                </label>
+                <label class="sim-control">
+                    Skip: <input type='number' id="skip" value=1>
                 </label>
                 <label class="sim-control">
                     <!-- Defaults to dt = 100,000 years per step -->
@@ -54,6 +58,9 @@
                 <label class="sim-control">
                     Distance from Center (light years): <input type='number' id="cameraDist" value=15>
                 </label>
+                <label class="sim-control">
+                    Follow Center of Mass? <input type="checkbox" id="follow">
+                </label>
 
                 <h3>Simulation Details</h3>
 
@@ -61,7 +68,15 @@
                     Galaxy Radius (light years): <input type='number' id="maxDist" value=5>
                 </label>
                 <label class="sim-control">
-                    Max Initial Speed (m/s): <input type='number' id="maxSpeed" value=23>
+                    Initial Velocity Direction:
+                    <select name="velDir" id="velDir">
+                        <option>Tangent to Orbit</option>
+                        <option>Random</option>
+                    </select>
+                </label>
+                <label class="sim-control">
+                    Max Initial Speed (m/s): <input type='number' id="maxSpeed" value=500>
+                    <i>Only considered if velocity direction is random</i>
                 </label>
                 <label class="sim-control">
                     Max Star Mass (kg): <input type='number' id="maxMass" value=8.0e30>
@@ -80,10 +95,12 @@
                     Plot Period (Number of Time Steps): <input type='number' id="plotPeriod" value=10>
                 </label>
             </div>
-            <div class="sim-canvas-container">
+            <div class="sim-canvas-container graph-container">
+                <h3>Total Energy</h3>
                 <canvas id="Energy-canvas"></canvas>
             </div>
-            <div class="sim-canvas-container">
+            <div class="sim-canvas-container graph-container">
+                    <h3>Total Angular Momentum</h3>
                 <canvas id="AngMomentum-canvas"></canvas>
             </div>
         </div>

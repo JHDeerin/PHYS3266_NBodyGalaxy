@@ -26,8 +26,9 @@ function initSimulation() {
 
     let objects = spawnRandomObjects(numObj, galaxyRadius*LIGHT_YEAR_METERS, maxSpeed);
     setMass(objects, getNum('minMass'), getNum('maxMass'));
-    setOrbitVel(objects, bigG); //TODO: Make velocity setting an option (this function currently overwrites UI velocity setting)
-    
+    if (document.getElementById('velDir').selectedIndex !== 1) {
+        setOrbitVel(objects, bigG);
+    }
 
     simulation = new GravityCalculator(objects, bigG, dt, theta);
 
@@ -44,7 +45,7 @@ function spawnRandomObjects(numObjects, maxDist, maxVelocity) {
         let position = new Point3D(randRange(-maxDist, maxDist),
                                    randRange(-maxDist, maxDist),
                                    randRange(-maxDist, maxDist));
-
+        // sets velocities randomly by default
         let velocity = new Point3D(randRange(-maxVelocity, maxVelocity),
                                    randRange(-maxVelocity, maxVelocity),
                                    randRange(-maxVelocity, maxVelocity));
@@ -106,10 +107,14 @@ function randRange(min, max) {
 
 function runSimulation(timePassed = 0) {
     if (isRunning) {
-        simulation.updatePositions();
-        simulation.mergeCollidingObjects(getNum('collisionDist'));
+        setNum('numObjOutput', simulation.objects.length);
+        const skip = getNum('skip') 
+        for (let i = 0; i < skip; i++) {
+            simulation.updatePositions();
+            simulation.mergeCollidingObjects(getNum('collisionDist'));
+        }
         renderSimulation(simulation,simulation_time);
-        simulation_time += simulation.dt;
+        simulation_time += simulation.dt*skip;
     }
     requestAnimationFrame(runSimulation);
 }
@@ -118,6 +123,10 @@ function runSimulation(timePassed = 0) {
 // UI Code
 function getNum(id){ /* gets the number from the GUI using the id */
     return eval(document.getElementById(id).value) ;
+}
+
+function setNum(id, value) {
+    document.getElementById(id).innerHTML = value;
 }
 
 document.addEventListener('click', function(event) {

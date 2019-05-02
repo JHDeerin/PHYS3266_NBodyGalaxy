@@ -111,7 +111,7 @@ class TreeNode {
         // If far enough away (or we're at the bottom of the tree), approximate
         // gravitation force w/ this node's center of mass
         const distanceFactor = distance / this.size;
-        distance += (6.0e7)**2; //TODO: Make this a variable (adds relaxation constant so near collisions don't "blow up")
+        distance += 6.0e15; //TODO: Make this a variable (adds relaxation constant so near collisions don't "blow up")
         if (distanceFactor < theta 
                 || this.numChildObjects == 1
                 || this.depth == this.maxDepth) {
@@ -241,7 +241,7 @@ function totalEnergy(sim) {
         }
     }
     var T = sim.objects.reduce(function(totalKineticE,c){return totalKineticE + (1./2.)*c.mass*Math.pow(c.velocity.magnitude(),2)},0);
-    console.log(T-(1/2)*U);
+    //console.log(T-(1/2)*U);
     return (T - (1./2.)*U);
 }
     
