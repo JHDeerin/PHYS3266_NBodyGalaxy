@@ -58,6 +58,7 @@ header {
 
 .graph-container {
     margin: 10px;
+    margin-bottom: 2em;
     max-width: 500px;
 }
 
