@@ -233,21 +233,20 @@ function totalEnergy(sim) {
     var U = 0;
     for(var i=0;i<sim.objects.length;i++){
         for(var j=0;j<sim.objects.length;j++){
-            let dvector = sim.objects[i].location.sub(sim.objects[j].location);
-            if (dvector.magnitude() ==0){
+            if (i == j) {
                 continue;
             }
-            U = U - (sim.bigG*sim.objects[i].mass*sim.objects[j].mass)/(dvector.magnitude());
+            let dvector = sim.objects[i].location.sub(sim.objects[j].location);
+            U -= (sim.bigG*sim.objects[i].mass*sim.objects[j].mass)/(dvector.magnitude());
         }
     }
     var T = sim.objects.reduce(function(totalKineticE,c){return totalKineticE + (1./2.)*c.mass*Math.pow(c.velocity.magnitude(),2)},0);
-    //console.log(T-(1/2)*U);
-    return (T - (1./2.)*U);
+    return (T+U);
 }
     
 
 function totalAngMomentum(sim) {
-    var A = sim.objects.reduce(function(totalAngMoment,d){return totalAngMoment + d.location.cross(d.mass*d.velocity).magnitude()},0);
+    var A = sim.objects.reduce(function(totalAngMoment,d){return totalAngMoment + d.location.cross(d.velocity.mult(d.mass)).magnitude()},0);
     
     return A;
 }
