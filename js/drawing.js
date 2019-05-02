@@ -20,6 +20,10 @@ var plt1 = null;
 var plt2 = null;
 var Energycurve = null ; 
 var AngMomentumcurve = null ;
+
+/**
+ * Simple method to test that drawing to the canvas is working
+ */
 function drawPlaceholderMessage() {
     initCanvas();
 
@@ -50,6 +54,8 @@ function updateCanvasSize(canvas) {
     canvas.height = canvas.clientHeight;
 }
 function initializePlots(){
+    ptime = 0;
+
     plt1 = new Plot(canvas1);
     plt1.ylimits=[0,1e39] ;
     plt1.xlimits=[0,getNum('plotPeriod')];
@@ -128,6 +134,8 @@ function renderSimulation(sim, simulation_time) {
         plt2.xlimits = [ xl[0]+plotPeriod, xl[1]+plotPeriod ] ;
         plt1.init();
         plt2.init();
+        Energycurve.reset();
+        AngMomentumcurve.reset();
     }
      Energycurve.plot(current_timestep,totalEnergy(sim));
      AngMomentumcurve.plot(current_timestep,totalAngMomentum(sim));

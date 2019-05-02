@@ -1,4 +1,6 @@
-// TODO: Holy cow, this whole thing is in MAJOR need of refactoring
+/**
+ * Main "runner file"/starting-point for the simulation
+ */
 
 import { initCanvas, renderSimulation } from './drawing.js';
 import { GravityCalculator, GravityObject, Point3D } from './simulationClasses.js';
