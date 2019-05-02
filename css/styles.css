@@ -56,6 +56,11 @@ header {
     margin-top: 100%;
 }
 
+.graph-container {
+    margin: 10px;
+    max-width: 500px;
+}
+
 #Energy-canvas {
     background: white;
 }
