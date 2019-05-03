@@ -51,7 +51,7 @@ function updateCanvasSize(canvas) {
 }
 function initializePlots(){
     plt1 = new Plot(canvas1);
-    plt1.ylimits=[0,1e39] ;
+    plt1.ylimits=[0,2.5e38] ;
     plt1.xlimits=[0,getNum('plotPeriod')];
     plt1.grid = 'on' ;
     plt1.xticks.noDivs = 5 ;
@@ -64,7 +64,7 @@ function initializePlots(){
     plt1.legend.location = [430,20] ;
 
     plt2 = new Plot(canvas2);
-    plt2.ylimits=[0,1e53] ;
+    plt2.ylimits=[0,2.5e52] ;
     plt2.xlimits=[0,getNum('plotPeriod')] ;
     plt2.grid = 'on' ;
     plt2.xticks.noDivs = 5 ;
