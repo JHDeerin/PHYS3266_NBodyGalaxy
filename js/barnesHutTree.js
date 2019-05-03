@@ -241,14 +241,13 @@ function totalEnergy(sim) {
         }
     }
     var T = sim.objects.reduce(function(totalKineticE,c){return totalKineticE + (1./2.)*c.mass*Math.pow(c.velocity.magnitude(),2)},0);
-    console.log(T-(1/2)*U);
-    return (T - (1./2.)*U);
+    return (T + (1./2.)*U);
 }
     
 
 function totalAngMomentum(sim) {
-    var A = sim.objects.reduce(function(totalAngMoment,d){return totalAngMoment + d.location.cross(d.mass*d.velocity).magnitude()},0);
-    
+    var A = sim.objects.reduce(function(totalAngMoment,d){return totalAngMoment + d.location.cross(d.velocity.mult(d.mass)).magnitude()},0);
+    console.log(A)
     return A;
 }
 

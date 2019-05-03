@@ -106,11 +106,16 @@ class Ticks{
                 if ( this.precision != undefined ){
                     num = num.toFixed(this.precision) ;
                 }
-                this.ticks.push( this.min+(i)*delta );
-                this.labels.push(num+this.unit) ;
+                this._ticks.push( this._min+(i)*delta );
+                this._labels.push(num+this.unit) ;
             }
         }
-        this.callback() ;
+
+    }
+
+    reset(){
+        this.init() ;
+        this.plot.init() ;
     }
     
     set ncall(nc){
@@ -134,7 +139,6 @@ class Ticks{
     }
     get min(){
         return this._min ;
-        this.init() ;
     }
 
     /* max          */
@@ -157,13 +161,13 @@ class Ticks{
     }
     set unit(nu){
         this._unit = nu ;
-        this.init() ;
+        this.reset() ;
     }
 
     /* mode         */
     set mode(nm){
         this._mode = nm ;
-        this.init() ;
+        this.reset() ;
     }
     get mode(){
         return this._mode ;
@@ -175,6 +179,7 @@ class Ticks{
     }
     set font(nf){
         this._font = ft ;
+        this.reset() ;
     }
 
     /* style        */
@@ -183,12 +188,13 @@ class Ticks{
     }
     set style(ns){
         this._style = ns ;
+        this.reset() ;
     }
     
     /* precision    */
     set precision(np){
         this._precision = np ;
-        this.init() ;
+        this.reset() ;
     }
     get precision(){
         return this._precision ;
@@ -200,12 +206,11 @@ class Ticks{
     }
     set number(nn){
         this._number = nn ;
-        this.init() ;
-        this.ncall() ;
+        this.reset() ;
     }
     set noTicks(nn){
         this._number = nn ;
-        this.init() ;
+        this.reset() ;
     }
 
     set noDivisions(nd){
@@ -241,7 +246,7 @@ class Ticks{
         this._ticks = nt ;
         this.number = this._ticks.length ;
         this._mode  = 'auto' ;
-        this.init() ;
+        this.reset() ;
     }
 
     /* labels       */
@@ -250,7 +255,7 @@ class Ticks{
     }
     set labels(nl){
         this._labels = nl ;
-        this.init() ;
+        this.reset() ;
     }
 
     set plot(np){
@@ -871,8 +876,8 @@ class Plot{
         this._xlabel    = readOption(options.xlabel,null) ;
         this._ylabel    = readOption(options.ylabel,null) ;
 
-        this._xticks    = new Ticks({callback:this.init}) ;
-        this._yticks    = new Ticks({callback:this.init}) ;
+        this._xticks    = new Ticks({plot:this}) ;
+        this._yticks    = new Ticks({plot:this}) ;
         this._legendOptions = readOption(options.legend,{visible: false, place: 'top-right'} ) ;
         this._curves = [] ;
         this._marginOptions= readOption(options.margins,{}) ;
@@ -901,7 +906,7 @@ class Plot{
             rgbToHex(0,0,255) ,
         ] ; 
         this._legendOptions.plot = this ;
-        this.legend = new Legend(this._legendOptions) ;
+        this._legend = new Legend(this._legendOptions) ;
 
 
         this.grid       = readOption(options.grid, false) ;
@@ -909,6 +914,16 @@ class Plot{
         this.draw() ;
     }
 
+    get legend(){
+        return this._legend ;
+    }
+    set legend(nv){
+        if ( nv.toUpperCase() == 'ON' || nv == true){
+            this.legend.visible = true ;
+        }else{
+            this.legend.visible = false ;
+        }
+    }
     get xlabel(){
         return this._xlabel ;
     }
@@ -1142,6 +1157,9 @@ class Plot{
         }
     }
     init(){
+        for (var i=0;i<this.curves.length;i++){
+            this.curves[i].reset() ;
+        }
         this.back.setTransform(1,0,0,1,0,0) ;
         this.fore.setTransform(1,0,0,1,0,0) ;
         this.back.clearRect(0,0,this.width,this.height) ;
@@ -1260,15 +1278,15 @@ class Plot{
         this.draw() ;
     }
 
+    set curves(c){
+        this._curves = c ;
+        this.init() ;
+    }
     get curves(){
         return this._curves ;
     }
     reset(){
-        for (var i=0;i<this._curves.length;i++){
-            this.curves[i].reset() ;
-        }
-        this.front.setTransform(1,0,0,1,0,0) ;
-        this.front.clearRect(0,0,this.width,this.height) ;
+        
         this.init() ;
     }
     draw(){
@@ -1301,5 +1319,9 @@ class Plot{
         this.init() ;
         return nc ;
     }
+    deleteCurves(){
+        this.curves = [] ;
+    }
 }
-export {Plot};
+
+export {Plot}

@@ -64,7 +64,7 @@ function initializePlots(){
     plt1.legend.location = [430,20] ;
 
     plt2 = new Plot(canvas2);
-    plt2.ylimits=[0,1e20] ;
+    plt2.ylimits=[0,1e53] ;
     plt2.xlimits=[0,getNum('plotPeriod')] ;
     plt2.grid = 'on' ;
     plt2.xticks.noDivs = 5 ;
@@ -114,7 +114,7 @@ function renderSimulation(sim, simulation_time) {
             ctx.fillRect(screenPos.x, screenPos.y, squareSize, squareSize);
         }
     }
-    ptime += sim.dt;
+    
     if(ptime>plotPeriod*sim.dt){
         var xl = plt1.xlimits ;
         ptime -=plotPeriod*sim.dt ;
@@ -123,6 +123,7 @@ function renderSimulation(sim, simulation_time) {
         plt1.init() ;
         plt2.init();
     }
+    ptime += sim.dt;
      Energycurve.plot(current_timestep,totalEnergy(sim));
      AngMomentumcurve.plot(current_timestep,totalAngMomentum(sim));
 }
